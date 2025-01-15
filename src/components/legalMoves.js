@@ -2,7 +2,7 @@ const boundarySet = new Set([
   '0,3', '0,5', '1,3', '1,6', '2,3', '2,7', '3,3', '3,8',
   '4,-1', '4,13', '5,0', '5,13', '6,1', '6,13', '7,2', '7,13',
   '8,3', '8,13', '9,3', '9,14', '10,3', '10,15', '11,3', '11,16',
-  '12,3', '12,17', '13,8', '13,18', '14,9', '14,13', '15,10', '15,13',
+  '12,3', '12,17', '13,8', '13,13', '14,9', '14,13', '15,10', '15,13',
   '16,11', '16,13'
 ]);
 
@@ -19,12 +19,12 @@ export function getLegalMoves(row, col, occupant, grid) {
 
   // Helper function to perform BFS for multi-jumping
   const bfsJump = (startRow, startCol, occupant) => {
-    const queue = [{ row: startRow, col: startCol }];
+    const queue = [{ row: startRow, col: startCol, path: [] }];
     const visited = new Set([`${startRow},${startCol}`]);
     const validJumps = [];
 
     while (queue.length > 0) {
-      const { row, col } = queue.shift();
+      const { row, col, path } = queue.shift();
 
       directions.forEach((direction) => {
         let currentRow = row + direction.row;
@@ -62,9 +62,13 @@ export function getLegalMoves(row, col, occupant, grid) {
                 }
               }
               if (isValidJump && !visited.has(`${mirroredRow},${mirroredCol}`)) {
-                validJumps.push({ row: mirroredRow, col: mirroredCol });
+                const newPath = [...path, { row: mirroredRow, col: mirroredCol }];
+                validJumps.push({ row: mirroredRow, col: mirroredCol, path: newPath });
                 visited.add(`${mirroredRow},${mirroredCol}`);
-                queue.push({ row: mirroredRow, col: mirroredCol });
+                queue.push({ row: mirroredRow, col: mirroredCol, path: newPath });
+
+                // Log the jump and the path leading to it
+                //console.log(`Jump to (${mirroredRow}, ${mirroredCol}) with path: ${JSON.stringify(newPath)}`);
               }
             }
           }

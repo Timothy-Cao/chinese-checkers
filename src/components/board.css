@@ -122,4 +122,36 @@ html, body {
   .buttons button:hover {
     background-color: #0056b3;
   }
-  
+  /* Board Styles */
+.board-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 50px;
+  height: 45px; 
+}
+
+.circle {
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.legal-move {
+  border: 2px solid yellow;
+}
+
+.glow {
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+}

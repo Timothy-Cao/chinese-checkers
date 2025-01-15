@@ -17,7 +17,7 @@ const CongratulationsPopup = ({ open, winner, onClose, onReset }) => {
           {winnerText}
         </Typography>
         <Typography variant="body1" sx={{ color: 'gray', marginBottom: '2rem' }}>
-          Well played! You are the champion of this round.
+          YOU ARE THE ULTIMATE CHAMPION
         </Typography>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
           <Button 

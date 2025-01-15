@@ -9,8 +9,8 @@ const BoardStringInput = ({ boardString, handleBoardStringChange, getBoardString
         placeholder="Enter board string"
       />
       <div className="buttons">
-        <button onClick={getBoardStringValue}>Get Board String</button>
         <button onClick={loadBoardFromString}>Load Board</button>
+        <button onClick={getBoardStringValue}>Get String</button>
         <button onClick={resetBoard} className="reset-button">Reset</button> 
       </div>
     </div>

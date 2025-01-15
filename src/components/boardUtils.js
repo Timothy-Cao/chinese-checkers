@@ -56,7 +56,7 @@ export const getCircleColor = (occupant) => {
     case 2:
       return 'blue';
     default:
-      return 'gray';
+      return '#222222';
   }
 };
 

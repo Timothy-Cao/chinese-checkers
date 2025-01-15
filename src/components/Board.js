@@ -18,9 +18,9 @@ const Board = () => {
   const [selectedCircle, setSelectedCircle] = useState(null);
   const [occupantGrid, setOccupantGrid] = useState(generateOccupantGrid(rows, cols));
   const [legalMoves, setLegalMoves] = useState([]);
-  const [turn, setTurn] = useState(1); // 1 = Red, 2 = Blue
-  const [moveHistory, setMoveHistory] = useState([]); // Track move history
-  const [boardString, setBoardString] = useState(''); // State for the board string input
+  const [turn, setTurn] = useState(1); 
+  const [moveHistory, setMoveHistory] = useState([]); 
+  const [boardString, setBoardString] = useState(''); 
   const grid = generateBoard(rowPattern, startColumns);
 
   const goodSound = new Audio('/media/good.mp3');
@@ -68,8 +68,8 @@ const Board = () => {
     setLegalMoves([]);
     setTurn(turn === 1 ? 2 : 1); 
   };
-
-  const backgroundColor = turn === 1 ? 'lightcoral' : 'lightblue';
+  
+const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
 
   useEffect(() => {
     console.log("Current Occupant Grid:", occupantGrid);

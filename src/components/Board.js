@@ -25,11 +25,24 @@ const Board = () => {
 
   const handleCircleSelect = (rowIndex, colIndex) => {
     const occupant = occupantGrid[rowIndex][colIndex];
-    if (occupant === 0 || occupant !== turn) return; 
+  
+    if (selectedCircle && selectedCircle.row === rowIndex && selectedCircle.col === colIndex) {
+      setSelectedCircle(null);
+      setLegalMoves([]);
+      return;
+    }
+  
+    if (occupant === 0 || occupant !== turn) { 
+      setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
+      setLegalMoves([]); 
+      return;
+    }
+  
     setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
     const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid, setMoveHistory);
     setLegalMoves(moves);
   };
+  
 
   const handleMove = (rowIndex, colIndex) => {
     if (!legalMoves.some((move) => move.row === rowIndex && move.col === colIndex)) return;

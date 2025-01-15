@@ -122,7 +122,7 @@ html, body {
   .buttons button:hover {
     background-color: #000000;
   }
-  /* Board Styles */
+  
 .board-grid {
   display: flex;
   flex-direction: column;
@@ -176,15 +176,15 @@ html, body {
   box-shadow: 0 0 20px rgba(255, 255, 255, 1);
 }
 .buttons .reset-button {
-  background-color: rgba(255, 0, 0, 0.5); /* Red background */
-  color: white;          /* White text */
-  border: none;          /* No border */
-  padding: 10px;         /* Padding for spacing */
-  border-radius: 5px;    /* Rounded corners */
-  cursor: pointer;       /* Pointer cursor on hover */
-  margin-top: 10px;      /* Additional spacing */
+  background-color: rgba(255, 0, 0, 0.5); 
+  color: white;    
+  border: none;        
+  padding: 10px;        
+  border-radius: 5px;   
+  cursor: pointer;   
+  margin-top: 10px;      
 }
 
 .buttons .reset-button.reset-button:hover {
-  background-color: rgb(255, 0, 0); /* Darker red on hover */
+  background-color: rgb(255, 0, 0);
 }

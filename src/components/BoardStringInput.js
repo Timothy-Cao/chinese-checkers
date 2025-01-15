@@ -1,7 +1,6 @@
-// BoardStringInput.js
 import React from 'react';
 
-const BoardStringInput = ({ boardString, handleBoardStringChange, getBoardStringValue, loadBoardFromString }) => {
+const BoardStringInput = ({ boardString, handleBoardStringChange, getBoardStringValue, loadBoardFromString, resetBoard }) => {
   return (
     <div className="input-box">
       <textarea
@@ -12,6 +11,7 @@ const BoardStringInput = ({ boardString, handleBoardStringChange, getBoardString
       <div className="buttons">
         <button onClick={getBoardStringValue}>Get Board String</button>
         <button onClick={loadBoardFromString}>Load Board</button>
+        <button onClick={resetBoard} className="reset-button">Reset</button> 
       </div>
     </div>
   );

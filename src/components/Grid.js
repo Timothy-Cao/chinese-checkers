@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { getCircleColor } from './boardUtils';
 
 const Grid = ({ 
@@ -12,6 +12,11 @@ const Grid = ({
   circleDiameter, 
   occupantGrid 
 }) => {
+  const handleHover = (rowIndex, colIndex) => {
+    const hoverSound = new Audio('/media/hover.mp3');  
+    hoverSound.play().catch((err) => console.error("Hover sound error:", err));
+  };
+
   const isLegalMove = (row, col) =>
     legalMoves.some((move) => move.row === row && move.col === col);
 
@@ -29,6 +34,7 @@ const Grid = ({
                   ? handleMove(rowIndex, colIndex)
                   : handleCircleSelect(rowIndex, colIndex)
               }
+              onMouseEnter={() => handleHover(rowIndex, colIndex)} 
             >
               <div
                 className={`circle ${isLegalMove(rowIndex, colIndex) ? 'legal-move' : ''} ${

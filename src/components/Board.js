@@ -23,6 +23,9 @@ const Board = () => {
   const [boardString, setBoardString] = useState(''); // State for the board string input
   const grid = generateBoard(rowPattern, startColumns);
 
+  const goodSound = new Audio('/media/good.mp3');
+  const badSound = new Audio('/media/bad.mp3');
+
   const handleCircleSelect = (rowIndex, colIndex) => {
     const occupant = occupantGrid[rowIndex][colIndex];
   
@@ -33,22 +36,33 @@ const Board = () => {
     }
   
     if (occupant === 0 || occupant !== turn) { 
+      badSound.play();
       setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
       setLegalMoves([]); 
       return;
     }
-  
+
+    goodSound.play();
     setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
     const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid, setMoveHistory);
     setLegalMoves(moves);
   };
   
+  const resetBoard = () => {
+    const initialGrid = generateOccupantGrid(rows, cols); 
+    setOccupantGrid(initialGrid);
+    setSelectedCircle(null);
+    setLegalMoves([]);
+    setMoveHistory([]);
+    setTurn(1); 
+  };
 
   const handleMove = (rowIndex, colIndex) => {
     if (!legalMoves.some((move) => move.row === rowIndex && move.col === colIndex)) return;
 
     const newGrid = handleMoveOnGrid(occupantGrid, selectedCircle, rowIndex, colIndex);
 
+    goodSound.play();
     setOccupantGrid(newGrid);
     setSelectedCircle(null);
     setLegalMoves([]);
@@ -118,6 +132,7 @@ const Board = () => {
         handleBoardStringChange={handleBoardStringChange}
         getBoardStringValue={getBoardStringValue}
         loadBoardFromString={loadBoardFromString}
+        resetBoard={resetBoard}
       />
       
     </div>

@@ -112,7 +112,7 @@ html, body {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
-    background-color: #00000071;
+    background-color: #00000080;
     border: none;
     border-radius: 5px;
     color: white;
@@ -120,7 +120,7 @@ html, body {
   }
   
   .buttons button:hover {
-    background-color: #0056b3;
+    background-color: #000000;
   }
   /* Board Styles */
 .board-grid {
@@ -174,4 +174,17 @@ html, body {
 .circle:active {
   transform: translate(-50%, -50%) scale(1.4);
   box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
+.buttons .reset-button {
+  background-color: rgba(255, 0, 0, 0.5); /* Red background */
+  color: white;          /* White text */
+  border: none;          /* No border */
+  padding: 10px;         /* Padding for spacing */
+  border-radius: 5px;    /* Rounded corners */
+  cursor: pointer;       /* Pointer cursor on hover */
+  margin-top: 10px;      /* Additional spacing */
+}
+
+.buttons .reset-button.reset-button:hover {
+  background-color: rgb(255, 0, 0); /* Darker red on hover */
 }

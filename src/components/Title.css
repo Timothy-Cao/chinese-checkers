@@ -1,32 +1,62 @@
-/* Title.css */
 .title-container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 10;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.title-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 5px;
+  transform: translateY(15%);
+  text-align: left;
+  width: 300px;
+}
+
+.main-title {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: gray;
+  margin: 0;
+}
+
+.text {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.rules-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+  width: 300px;
+  transform: translateY(35%);
+}
+
+.rules-title {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.rules-box p {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.rules-box ul {
+  margin-left: 20px;
+}
+
+@media (max-width: 1200px) {
+  .title-container,
+  .title-box,
+  .rules-box {
+    display: none; 
   }
-  
-  .title-box {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 5px;
-    transform: translateY(15%); 
-    text-align: left;
-    width: 300px; 
-  }
-  
-  .main-title {
-    font-size: 2rem;
-    margin: 0;
-  }
-  
-  .subtitle {
-    font-size: 1rem;
-    color: gray;
-    margin: 0;
-  }
-  
-  .txt, .subtitle, .main-title {
-    text-align: left;
-  }
-  
+}

@@ -74,9 +74,35 @@ export const getBoardString = (occupantGrid) => {
 };
 
 export const handleMoveOnGrid = (occupantGrid, selectedCircle, rowIndex, colIndex) => {
-  const newGrid = occupantGrid.map((row) => [...row]); // Clone the grid
-  newGrid[rowIndex][colIndex] = selectedCircle.occupant; // Move occupant
-  newGrid[selectedCircle.row][selectedCircle.col] = 0; // Clear previous position
+  const newGrid = occupantGrid.map((row) => [...row]); 
+  newGrid[rowIndex][colIndex] = selectedCircle.occupant; 
+  newGrid[selectedCircle.row][selectedCircle.col] = 0; 
 
   return newGrid;
+};
+
+export const checkWinner = (occupantGrid, currentPlayer) => {
+  const occupant1Positions = [
+    { row: 13, cols: [9, 10, 11, 12] },
+    { row: 14, cols: [10, 11, 12] },
+    { row: 15, cols: [11, 12] },
+    { row: 16, cols: [12] },
+  ];
+  const occupant2Positions = [
+    { row: 0, cols: [4] },
+    { row: 1, cols: [4, 5] },
+    { row: 2, cols: [4, 5, 6] },
+    { row: 3, cols: [4, 5, 6, 7] },
+  ];
+  const positionsToCheck = currentPlayer === 1 ? occupant2Positions : occupant1Positions;
+
+  for (const position of positionsToCheck) {
+    for (const col of position.cols) {
+      if (occupantGrid[position.row][col] !== currentPlayer) {
+        return false; 
+      }
+    }
+  }
+
+  return true;  
 };

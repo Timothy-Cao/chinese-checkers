@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './board.css';
-import { generateOccupantGrid, generateBoard, generateBoardFromString, getBoardString, handleMoveOnGrid } from './boardUtils';
+import { generateOccupantGrid, generateBoard, generateBoardFromString, getBoardString, handleMoveOnGrid, checkWinner } from './boardUtils';
 import { getLegalMoves } from './legalMoves';
 import BoardStringInput from './BoardStringInput'; 
-import Grid from './Grid'; 
+import Grid from './Grid';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
+import CongratulationsPopup from './CongratulationsPopup';
 
 const Board = () => {
   const gridWidth = 50;
@@ -19,8 +21,10 @@ const Board = () => {
   const [occupantGrid, setOccupantGrid] = useState(generateOccupantGrid(rows, cols));
   const [legalMoves, setLegalMoves] = useState([]);
   const [turn, setTurn] = useState(1); 
-  const [moveHistory, setMoveHistory] = useState([]); 
   const [boardString, setBoardString] = useState(''); 
+  const [openDialog, setOpenDialog] = useState(false); 
+  const [winner, setWinner] = useState(null); 
+
   const grid = generateBoard(rowPattern, startColumns);
 
   const goodSound = new Audio('/media/good.mp3');
@@ -44,7 +48,7 @@ const Board = () => {
 
     goodSound.play();
     setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
-    const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid, setMoveHistory);
+    const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid);
     setLegalMoves(moves);
   };
   
@@ -53,8 +57,8 @@ const Board = () => {
     setOccupantGrid(initialGrid);
     setSelectedCircle(null);
     setLegalMoves([]);
-    setMoveHistory([]);
     setTurn(1); 
+    setWinner(null); 
   };
 
   const handleMove = (rowIndex, colIndex) => {
@@ -67,13 +71,15 @@ const Board = () => {
     setSelectedCircle(null);
     setLegalMoves([]);
     setTurn(turn === 1 ? 2 : 1); 
+
+    if (checkWinner(newGrid, turn)) {
+      setWinner(turn); 
+      setOpenDialog(true); 
+    }
   };
   
 const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
 
-  useEffect(() => {
-    console.log("Current Occupant Grid:", occupantGrid);
-  }, [occupantGrid]);
 
   const handleBoardStringChange = (event) => {
     setBoardString(event.target.value);
@@ -92,49 +98,42 @@ const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
   };
 
   return (
-    <div>
-      <div className="board" style={{ backgroundColor }}>
-        <Grid
-          grid={grid}
-          selectedCircle={selectedCircle}
-          legalMoves={legalMoves}
-          handleCircleSelect={handleCircleSelect}
-          handleMove={handleMove}
-          gridWidth={gridWidth}
-          gridHeight={gridHeight}
-          circleDiameter={circleDiameter}
-          occupantGrid={occupantGrid}
-        />
-        <div className="move-history">
-          <h3>Move History</h3>
-          <ul>
-            {moveHistory.map((move, index) => (
-              <li key={index}>
-                {move.map((step, stepIndex) => (
-                  <span key={stepIndex}>
-                    [{step.row}, {step.col}]{" "}
-                  </span>
-                ))}
-              </li>
-            ))}
-          </ul>
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+      <div className="background-layer" style={{ backgroundColor }}></div>
+      <div className="board-layer">
+        <div className="board">
+          <Grid
+            grid={grid}
+            selectedCircle={selectedCircle}
+            legalMoves={legalMoves}
+            handleCircleSelect={handleCircleSelect}
+            handleMove={handleMove}
+            gridWidth={gridWidth}
+            gridHeight={gridHeight}
+            circleDiameter={circleDiameter}
+            occupantGrid={occupantGrid}
+          />
+          {selectedCircle && (
+            <div className="selection-info">
+              Row: {selectedCircle.row} Col: {selectedCircle.col}
+            </div>
+          )}
         </div>
-        {selectedCircle && (
-          <div className="selection-info">
-            Row: {selectedCircle.row} Col: {selectedCircle.col}
-          </div>
-        )}
+        <BoardStringInput
+          boardString={boardString}
+          handleBoardStringChange={handleBoardStringChange}
+          getBoardStringValue={getBoardStringValue}
+          loadBoardFromString={loadBoardFromString}
+          resetBoard={resetBoard}
+        />
       </div>
 
-      {/* Use the new BoardStringInput component */}
-      <BoardStringInput
-        boardString={boardString}
-        handleBoardStringChange={handleBoardStringChange}
-        getBoardStringValue={getBoardStringValue}
-        loadBoardFromString={loadBoardFromString}
-        resetBoard={resetBoard}
+      <CongratulationsPopup 
+        open={winner !== null} 
+        winner={winner} 
+        onClose={() => setWinner(null)} 
+        onReset={resetBoard} 
       />
-      
     </div>
   );
 };

@@ -15,6 +15,7 @@ const Board = () => {
   const [selectedCircle, setSelectedCircle] = useState(null);
   const [occupantGrid, setOccupantGrid] = useState(generateOccupantGrid());
   const [legalMoves, setLegalMoves] = useState([]);
+  const [turn, setTurn] = useState(1); // 1 = Red, 2 = Blue
 
   function generateOccupantGrid() {
     const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
@@ -34,13 +35,13 @@ const Board = () => {
 
     occupant1Positions.forEach(({ row, cols }) => {
       cols.forEach((col) => {
-        grid[row][col] = 1;
+        grid[row][col] = 1; // Red player
       });
     });
 
     occupant2Positions.forEach(({ row, cols }) => {
       cols.forEach((col) => {
-        grid[row][col] = 2;
+        grid[row][col] = 2; // Blue player
       });
     });
 
@@ -70,7 +71,7 @@ const Board = () => {
   const handleCircleSelect = (rowIndex, colIndex) => {
     const occupant = occupantGrid[rowIndex][colIndex];
 
-    if (occupant === 0) return; // Only selectable if it has an occupant
+    if (occupant === 0 || occupant !== turn) return; // Only selectable if it has an occupant and it's the player's turn
 
     setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
     const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid);
@@ -87,6 +88,9 @@ const Board = () => {
     setOccupantGrid(newGrid);
     setSelectedCircle(null);
     setLegalMoves([]);
+
+    // Switch turns after the move
+    setTurn(turn === 1 ? 2 : 1);
   };
 
   const getCircleColor = (occupant) => {
@@ -103,8 +107,11 @@ const Board = () => {
   const isLegalMove = (row, col) =>
     legalMoves.some((move) => move.row === row && move.col === col);
 
+  // Set background color based on whose turn it is
+  const backgroundColor = turn === 1 ? 'lightcoral' : 'lightblue';
+
   return (
-    <div className="board">
+    <div className="board" style={{ backgroundColor }}>
       {grid.map((row, rowIndex) => (
         <div className="row" key={rowIndex}>
           {row.map((colIndex) => (
@@ -140,8 +147,7 @@ const Board = () => {
       ))}
       {selectedCircle && (
         <div className="selection-info">
-          Row: {selectedCircle.row} Col: {selectedCircle.col} Occupant:{' '}
-          {selectedCircle.occupant}
+          Row: {selectedCircle.row} Col: {selectedCircle.col}
         </div>
       )}
     </div>

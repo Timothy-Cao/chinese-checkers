@@ -17,48 +17,66 @@ export function getLegalMoves(row, col, occupant, grid) {
     { row: 1, col: 1 },  
   ];
 
-  directions.forEach((direction) => {
-    let currentRow = row + direction.row;
-    let currentCol = col + direction.col;
-    const occupancyArray = [{ occupant, row, col }];
+  // Helper function to perform BFS for multi-jumping
+  const bfsJump = (startRow, startCol, occupant) => {
+    const queue = [{ row: startRow, col: startCol }];
+    const visited = new Set([`${startRow},${startCol}`]);
+    const validJumps = [];
 
-    while (currentRow >= 0 && currentRow < grid.length && currentCol >= 0 && currentCol < grid[0].length) {
-      const occupantAtCurrent = grid[currentRow][currentCol];
-      if (boundarySet.has(`${currentRow},${currentCol}`)) break;
-      occupancyArray.push({ occupant: occupantAtCurrent, row: currentRow, col: currentCol });
-      currentRow += direction.row;
-      currentCol += direction.col;
-    }
+    while (queue.length > 0) {
+      const { row, col } = queue.shift();
 
-    let secondNonZeroIndex = -1;
-    for (let i = 1; i < occupancyArray.length; i++) {
-      if (occupancyArray[i].occupant !== 0) {
-        secondNonZeroIndex = i;
-        break;
-      }
-    }
+      directions.forEach((direction) => {
+        let currentRow = row + direction.row;
+        let currentCol = col + direction.col;
+        const occupancyArray = [{ occupant, row, col }];
 
-    if (secondNonZeroIndex !== -1) {
-      const mirroredIndex = secondNonZeroIndex * 2;
-      if (mirroredIndex < occupancyArray.length) {
-        const mirroredRow = occupancyArray[mirroredIndex].row;
-        const mirroredCol = occupancyArray[mirroredIndex].col;
-        if (mirroredRow >= 0 && mirroredRow < grid.length && mirroredCol >= 0 && mirroredCol < grid[0].length &&
-            !boundarySet.has(`${mirroredRow},${mirroredCol}`) && grid[mirroredRow][mirroredCol] === 0) {
-          let isValidJump = true;
-          for (let i = secondNonZeroIndex + 1; i < mirroredIndex; i++) {
-            if (occupancyArray[i].occupant !== 0) {
-              isValidJump = false;
-              break;
-            }
-          }
-          if (isValidJump) {
-            legalMoves.push({ row: mirroredRow, col: mirroredCol });
+        while (currentRow >= 0 && currentRow < grid.length && currentCol >= 0 && currentCol < grid[0].length) {
+          const occupantAtCurrent = grid[currentRow][currentCol];
+          if (boundarySet.has(`${currentRow},${currentCol}`)) break;
+          occupancyArray.push({ occupant: occupantAtCurrent, row: currentRow, col: currentCol });
+          currentRow += direction.row;
+          currentCol += direction.col;
+        }
+
+        let secondNonZeroIndex = -1;
+        for (let i = 1; i < occupancyArray.length; i++) {
+          if (occupancyArray[i].occupant !== 0) {
+            secondNonZeroIndex = i;
+            break;
           }
         }
-      }
+
+        if (secondNonZeroIndex !== -1) {
+          const mirroredIndex = secondNonZeroIndex * 2;
+          if (mirroredIndex < occupancyArray.length) {
+            const mirroredRow = occupancyArray[mirroredIndex].row;
+            const mirroredCol = occupancyArray[mirroredIndex].col;
+            if (mirroredRow >= 0 && mirroredRow < grid.length && mirroredCol >= 0 && mirroredCol < grid[0].length &&
+                !boundarySet.has(`${mirroredRow},${mirroredCol}`) && grid[mirroredRow][mirroredCol] === 0) {
+              let isValidJump = true;
+              for (let i = secondNonZeroIndex + 1; i < mirroredIndex; i++) {
+                if (occupancyArray[i].occupant !== 0) {
+                  isValidJump = false;
+                  break;
+                }
+              }
+              if (isValidJump && !visited.has(`${mirroredRow},${mirroredCol}`)) {
+                validJumps.push({ row: mirroredRow, col: mirroredCol });
+                visited.add(`${mirroredRow},${mirroredCol}`);
+                queue.push({ row: mirroredRow, col: mirroredCol });
+              }
+            }
+          }
+        }
+      });
     }
 
+    return validJumps;
+  };
+
+  // Add adjacent moves (normal moves)
+  directions.forEach((direction) => {
     const adjacentRow = row + direction.row;
     const adjacentCol = col + direction.col;
     if (adjacentRow >= 0 && adjacentRow < grid.length && adjacentCol >= 0 && adjacentCol < grid[0].length &&
@@ -66,6 +84,10 @@ export function getLegalMoves(row, col, occupant, grid) {
       legalMoves.push({ row: adjacentRow, col: adjacentCol });
     }
   });
+
+  // Get multi-jump legal moves
+  const multiJumpMoves = bfsJump(row, col, occupant);
+  legalMoves.push(...multiJumpMoves);
 
   return legalMoves;
 }

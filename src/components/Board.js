@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './board.css';
+import { generateOccupantGrid, generateBoard, getCircleColor } from './boardUtils';
 import { getLegalMoves } from './legalMoves'; // Import the legal moves logic
 
 const Board = () => {
@@ -13,71 +14,23 @@ const Board = () => {
   const startColumns = [4, 4, 4, 4, 0, 1, 2, 3, 4, 4, 4, 4, 4, 9, 10, 11, 12];
 
   const [selectedCircle, setSelectedCircle] = useState(null);
-  const [occupantGrid, setOccupantGrid] = useState(generateOccupantGrid());
+  const [occupantGrid, setOccupantGrid] = useState(generateOccupantGrid(rows, cols));
   const [legalMoves, setLegalMoves] = useState([]);
   const [turn, setTurn] = useState(1); // 1 = Red, 2 = Blue
+  const [moveHistory, setMoveHistory] = useState([]); // Track move history
+  const [boardString, setBoardString] = useState(''); // State for the board string input
+  const grid = generateBoard(rowPattern, startColumns);
 
-  function generateOccupantGrid() {
-    const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
-
-    const occupant1Positions = [
-      { row: 13, cols: [9, 10, 11, 12] },
-      { row: 14, cols: [10, 11, 12] },
-      { row: 15, cols: [11, 12] },
-      { row: 16, cols: [12] },
-    ];
-    const occupant2Positions = [
-      { row: 0, cols: [4] },
-      { row: 1, cols: [4, 5] },
-      { row: 2, cols: [4, 5, 6] },
-      { row: 3, cols: [4, 5, 6, 7] },
-    ];
-
-    occupant1Positions.forEach(({ row, cols }) => {
-      cols.forEach((col) => {
-        grid[row][col] = 1; // Red player
-      });
-    });
-
-    occupant2Positions.forEach(({ row, cols }) => {
-      cols.forEach((col) => {
-        grid[row][col] = 2; // Blue player
-      });
-    });
-
-    return grid;
-  }
-
-  const generateBoard = () => {
-    const board = [];
-
-    for (let row = 0; row < rows; row++) {
-      const circleCount = rowPattern[row];
-      const startCol = startColumns[row];
-      const rowCells = [];
-
-      for (let i = 0; i < circleCount; i++) {
-        rowCells.push(startCol + i);
-      }
-
-      board.push(rowCells);
-    }
-
-    return board;
-  };
-
-  const grid = generateBoard();
-
+  // Handle circle selection
   const handleCircleSelect = (rowIndex, colIndex) => {
     const occupant = occupantGrid[rowIndex][colIndex];
-
     if (occupant === 0 || occupant !== turn) return; // Only selectable if it has an occupant and it's the player's turn
-
     setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
-    const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid);
+    const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid, setMoveHistory);
     setLegalMoves(moves);
   };
 
+  // Handle moving a circle
   const handleMove = (rowIndex, colIndex) => {
     if (!legalMoves.some((move) => move.row === rowIndex && move.col === colIndex)) return;
 
@@ -88,11 +41,10 @@ const Board = () => {
     setOccupantGrid(newGrid);
     setSelectedCircle(null);
     setLegalMoves([]);
-
-    // Switch turns after the move
-    setTurn(turn === 1 ? 2 : 1);
+    setTurn(turn === 1 ? 2 : 1); // Switch turns after the move
   };
 
+  // Get the color of a circle based on its occupant
   const getCircleColor = (occupant) => {
     switch (occupant) {
       case 1:
@@ -110,46 +62,110 @@ const Board = () => {
   // Set background color based on whose turn it is
   const backgroundColor = turn === 1 ? 'lightcoral' : 'lightblue';
 
+  // String to grid conversion function
+  const generateBoardFromString = (boardString) => {
+    const grid = [];
+    const rows = boardString.split(';');
+    rows.forEach((rowStr, rowIndex) => {
+      grid.push(rowStr.split(',').map((colStr) => parseInt(colStr, 10)));
+    });
+    return grid;
+  };
+
+  // Log the occupant grid on every update
+  useEffect(() => {
+    console.log("Current Occupant Grid:", occupantGrid);
+  }, [occupantGrid]);
+
+  // Handle board string changes from the text field
+  const handleBoardStringChange = (event) => {
+    setBoardString(event.target.value);
+  };
+
+  // Example usage of string-to-grid
+  const generatedBoard = generateBoardFromString(boardString);
+
+  // Add function to log the string representation of the grid
+  const logBoardString = () => {
+    const gridString = occupantGrid.map(row => row.join(',')).join(';');
+    console.log("Board String:", gridString);
+  };
+
+  // Add function to load the board from a string
+  const loadBoardFromString = () => {
+    const loadedGrid = generateBoardFromString(boardString);
+    setOccupantGrid(loadedGrid);
+  };
+
   return (
-    <div className="board" style={{ backgroundColor }}>
-      {grid.map((row, rowIndex) => (
-        <div className="row" key={rowIndex}>
-          {row.map((colIndex) => (
-            <div
-              className="cell"
-              key={colIndex}
-              style={{ width: gridWidth, height: gridHeight }}
-              onClick={() =>
-                selectedCircle && isLegalMove(rowIndex, colIndex)
-                  ? handleMove(rowIndex, colIndex)
-                  : handleCircleSelect(rowIndex, colIndex)
-              }
-            >
+    <div>
+      <div className="board" style={{ backgroundColor }}>
+        {grid.map((row, rowIndex) => (
+          <div className="row" key={rowIndex}>
+            {row.map((colIndex) => (
               <div
-                className={`circle ${
-                  isLegalMove(rowIndex, colIndex) ? 'legal-move' : ''
-                } ${
-                  selectedCircle &&
-                  selectedCircle.row === rowIndex &&
-                  selectedCircle.col === colIndex
-                    ? 'glow'
-                    : ''
-                }`}
-                style={{
-                  width: circleDiameter,
-                  height: circleDiameter,
-                  backgroundColor: getCircleColor(occupantGrid[rowIndex][colIndex]),
-                }}
-              />
-            </div>
-          ))}
+                className="cell"
+                key={colIndex}
+                style={{ width: gridWidth, height: gridHeight }}
+                onClick={() =>
+                  selectedCircle && isLegalMove(rowIndex, colIndex)
+                    ? handleMove(rowIndex, colIndex)
+                    : handleCircleSelect(rowIndex, colIndex)
+                }
+              >
+                <div
+                  className={`circle ${
+                    isLegalMove(rowIndex, colIndex) ? 'legal-move' : ''
+                  } ${
+                    selectedCircle &&
+                    selectedCircle.row === rowIndex &&
+                    selectedCircle.col === colIndex
+                      ? 'glow'
+                      : ''
+                  }`}
+                  style={{
+                    width: circleDiameter,
+                    height: circleDiameter,
+                    backgroundColor: getCircleColor(occupantGrid[rowIndex][colIndex]),
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+        <div className="move-history">
+          <h3>Move History</h3>
+          <ul>
+            {moveHistory.map((move, index) => (
+              <li key={index}>
+                {move.map((step, stepIndex) => (
+                  <span key={stepIndex}>
+                    [{step.row}, {step.col}]{" "}
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ul>
         </div>
-      ))}
-      {selectedCircle && (
-        <div className="selection-info">
-          Row: {selectedCircle.row} Col: {selectedCircle.col}
+        {selectedCircle && (
+          <div className="selection-info">
+            Row: {selectedCircle.row} Col: {selectedCircle.col}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom-left fixed text field and buttons */}
+      <div className="input-box">
+        <textarea
+          value={boardString}
+          onChange={handleBoardStringChange}
+          placeholder="Enter board string"
+        />
+        <div className="buttons">
+          <button onClick={logBoardString}>Log Board String</button>
+          <button onClick={loadBoardFromString}>Load Board</button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

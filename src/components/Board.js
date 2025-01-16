@@ -176,6 +176,7 @@ const Board = () => {
             checked={blueAIEnabled}
             onChange={() => setBlueAIEnabled((prev) => !prev)}
             name="BlueAI"
+            sx={{'& .MuiSwitch-track': {backgroundColor: 'white',},}}
             color="primary"
           />
         }
@@ -188,7 +189,8 @@ const Board = () => {
           <Switch
             checked={redAIEnabled}
             onChange={() => setRedAIEnabled((prev) => !prev)}
-            name="RedAI"
+            name="RedAI"      
+            sx={{'& .MuiSwitch-track': {backgroundColor: 'white',},}}
             color="primary"
           />
         }

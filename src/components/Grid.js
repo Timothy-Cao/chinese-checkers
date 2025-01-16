@@ -10,7 +10,8 @@ const Grid = ({
   gridWidth, 
   gridHeight, 
   circleDiameter, 
-  occupantGrid 
+  occupantGrid, 
+  aiMove 
 }) => {
   const handleHover = (rowIndex, colIndex) => {
     const hoverSound = new Audio('/media/hover.mp3');  
@@ -19,6 +20,20 @@ const Grid = ({
 
   const isLegalMove = (row, col) =>
     legalMoves.some((move) => move.row === row && move.col === col);
+
+  const handleClick = (rowIndex, colIndex) => {
+    if (selectedCircle && isLegalMove(rowIndex, colIndex)) {
+      handleMove(rowIndex, colIndex);
+    } else {
+      handleCircleSelect(rowIndex, colIndex);
+    }
+  };
+
+  React.useEffect(() => {
+    if (aiMove) {
+      handleMove(aiMove.row, aiMove.col); 
+    }
+  }, [aiMove, handleMove]);
 
   return (
     <div className="board-grid">
@@ -29,11 +44,7 @@ const Grid = ({
               className="cell"
               key={colIndex}
               style={{ width: gridWidth, height: gridHeight }}
-              onClick={() =>
-                selectedCircle && isLegalMove(rowIndex, colIndex)
-                  ? handleMove(rowIndex, colIndex)
-                  : handleCircleSelect(rowIndex, colIndex)
-              }
+              onClick={() => handleClick(rowIndex, colIndex)} 
               onMouseEnter={() => handleHover(rowIndex, colIndex)} 
             >
               <div

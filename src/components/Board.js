@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Switch, FormControlLabel } from '@mui/material';
 import './board.css';
 import { generateOccupantGrid, generateBoard, generateBoardFromString, getBoardString, handleMoveOnGrid, checkWinner } from './boardUtils';
 import { getLegalMoves } from './legalMoves';
 import BoardStringInput from './BoardStringInput'; 
 import Grid from './Grid';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
 import CongratulationsPopup from './CongratulationsPopup';
-
+import { BlueAI } from './BlueAI'; 
+ 
 const Board = () => {
   const gridWidth = 50;
   const gridHeight = 0.9 * gridWidth;
@@ -24,6 +25,7 @@ const Board = () => {
   const [boardString, setBoardString] = useState(''); 
   const [openDialog, setOpenDialog] = useState(false); 
   const [winner, setWinner] = useState(null); 
+  const [blueAIEnabled, setBlueAIEnabled] = useState(false); // State for Blue-AI toggle
 
   const grid = generateBoard(rowPattern, startColumns);
 
@@ -77,15 +79,40 @@ const Board = () => {
       setOpenDialog(true); 
     }
   };
-  
-const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
 
+
+  useEffect(() => {
+    if (blueAIEnabled && turn === 2) { // Blue-AI only plays on the blue player's turn
+      const aiMove = BlueAI(occupantGrid); // Get AI move
+      if (aiMove) {
+        // Log the AI move
+        console.log("AI move selected:", aiMove);
+  
+        // Pass the selectedCircle and the destination row and col
+        const newGrid = handleMoveOnGrid(occupantGrid, aiMove.selectedCircle, aiMove.moveTo.row, aiMove.moveTo.col);
+  
+        goodSound.play();
+        setOccupantGrid(newGrid); // Update the grid
+        setSelectedCircle(aiMove.selectedCircle); // Set the selected circle to the AI's selected circle
+        setLegalMoves([]); // Clear legal moves
+        setTurn(1); // Switch turn to player 1
+  
+        if (checkWinner(newGrid, 2)) { // Check if Blue wins
+          setWinner(2);
+          setOpenDialog(true);
+        }
+      }
+    }
+  }, [blueAIEnabled, turn, occupantGrid]);
+  
+  
+  
+
+  const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
 
   const handleBoardStringChange = (event) => {
     setBoardString(event.target.value);
   };
-
-  const generatedBoard = generateBoardFromString(boardString);
 
   const getBoardStringValue = () => {
     const gridString = getBoardString(occupantGrid);
@@ -112,6 +139,7 @@ const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
             gridHeight={gridHeight}
             circleDiameter={circleDiameter}
             occupantGrid={occupantGrid}
+            aiMove={blueAIEnabled && turn === 2 ? BlueAI(occupantGrid) : null}
           />
           {selectedCircle && (
             <div className="selection-info">
@@ -127,6 +155,24 @@ const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
           resetBoard={resetBoard}
         />
       </div>
+
+      <FormControlLabel
+        control={
+          <Switch
+            checked={blueAIEnabled}
+            onChange={() => setBlueAIEnabled((prev) => !prev)}
+            name="BlueAI"
+            color="primary"
+          />
+        }
+        label="Blue-AI"
+        sx={{
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          zIndex: 10,
+        }}
+      />
 
       <CongratulationsPopup 
         open={winner !== null} 

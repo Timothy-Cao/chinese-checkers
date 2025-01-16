@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Typography } from '@mui/material'; 
 import { red, blue } from '@mui/material/colors'; 
 
@@ -6,6 +6,13 @@ const CongratulationsPopup = ({ open, winner, onClose, onReset }) => {
   const winnerText = winner === 1 ? 'Player 1 (Red)' : 'Player 2 (Blue)';
   const backgroundColor = winner === 1 ? red[500] : blue[500];
   const textColor = winner === 1 ? red[700] : blue[700];
+
+  useEffect(() => {
+    if (open) {
+      const audio = new Audio('/media/win.mp3');
+      audio.play();
+    }
+  }, [open]); 
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

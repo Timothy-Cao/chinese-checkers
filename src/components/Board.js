@@ -96,6 +96,8 @@ const Board = () => {
       if (checkWinner(newGrid, turn)) {
         setWinner(turn); 
         setOpenDialog(true); 
+        setBlueAIEnabled(false);
+        setRedAIEnabled(false);
       }
     }
   };

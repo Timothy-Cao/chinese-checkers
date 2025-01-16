@@ -1,13 +1,6 @@
 import { getLegalMoves } from './legalMoves';
-
-function hexDistance(x1, y1, x2, y2) {
-  const dx = Math.abs(x2 - x1);
-  const dy = Math.abs(y2 - y1);
-  const diagonalMoves = Math.min(dx, dy);
-  const remainingMoves = Math.abs(dx - dy);
-  return diagonalMoves + remainingMoves;
-}
-
+import { hexDistance, scoringFunction, positionScore, cartDistance } from './AIUtils';
+  
 /**
  * BlueAI Differences:
  * 1. Blue prefers lower rows (opposite of red).
@@ -71,8 +64,8 @@ export const BlueAI = (occupantGrid) => {
         } 
         // If the starting row is tied, prioritize the move closest to the target
         else if (selectedCircle.row === bestMove.selectedCircle.row) {
-          const currentBestDistance = hexDistance(bestMove.moveTo.row, bestMove.moveTo.col, targetRow, targetCol);
-          const newDistance = hexDistance(move.row, move.col, targetRow, targetCol);
+          const currentBestDistance = cartDistance(bestMove.moveTo.row, bestMove.moveTo.col, targetRow, targetCol);
+          const newDistance = cartDistance(move.row, move.col, targetRow, targetCol);
 
           if (newDistance < currentBestDistance) {
             bestMove = { selectedCircle, moveTo: { row: move.row, col: move.col } };

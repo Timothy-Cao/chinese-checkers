@@ -12,6 +12,7 @@ html, body {
   width: 100%;
   height: 100%;
   z-index: 0; 
+  pointer-events: none; 
 }
 
 .board-layer {
@@ -28,18 +29,10 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: center;  
+  margin-left: 300px; 
+  width: calc(100% - 300px);
 }
-
-.row {
-    display: flex;
-}
-
-.cell {
-    background-color: transparent;
-    position: relative;
-}
-
 .circle {
     position: absolute;
     top: 50%;
@@ -63,8 +56,8 @@ html, body {
 
 .selection-info {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    top: 80px;
+    right: 20px;
     font-size: 14px;
     font-weight: bold;
     color: white;
@@ -93,7 +86,7 @@ html, body {
     padding: 10px;
     border-radius: 8px;
     color: white;
-    width: 300px;
+    width: 320px;
   }
   
   textarea {
@@ -106,20 +99,7 @@ html, body {
     border: 1px solid #ccc;
   }
   
-  .buttons button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    background-color: #00000080;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .buttons button:hover {
-    background-color: #000000;
-  }
+
   
 .board-grid {
   display: flex;
@@ -138,6 +118,8 @@ html, body {
   position: relative;
   width: 50px;
   height: 45px; 
+  background-color: transparent;
+  position: relative;
 }
 
 .circle {
@@ -176,11 +158,20 @@ html, body {
   box-shadow: 0 0 20px rgba(255, 255, 255, 1);
 }
 
+.buttons button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  background-color: #00000080;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
 
-
-
-
-
+.buttons button:hover {
+  background-color: #000000;
+}
 
 .buttons .reset-button {
   background-color: rgba(255, 0, 0, 0.5); 
@@ -196,17 +187,30 @@ html, body {
   background-color: rgb(255, 0, 0);
 }
 
-@media (max-width: 1200px) {
-  .selection-info,
-  .turn-indicator,
-  .input-box,
-  .title-box {
-      display: none;
-  }
+
+.form-control-label {
+  position:absolute;
+  right: 10px; 
+  z-index: 10;
+}
+
+.form-control-label.blue {
+  top: 10px; 
+}
+
+.form-control-label.red {
+  top: 40px; 
+}
+
+
+@media (max-width: 1200px) or (max-height: 900px) {
 
   .board {
     transform: scale(0.6);
     transform-origin: center; 
+    align-items: center;  
+    margin-left: 0px; 
+    width: 100% ;
   }
 
   .cell {
@@ -219,4 +223,55 @@ html, body {
     height: 75%;
   }
 
+  .form-control-label {
+    position:absolute;
+    left: 20px; 
+    z-index: 10;
+  }
+  
+  .form-control-label.blue {
+    top: 180px; 
+  }
+  
+  .form-control-label.red {
+    top: 220px; 
+  }
+
+  .input-box {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 0px;
+    border-radius: 8px;
+    color: white;
+    width: 100%;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-between; 
+    width: 100%; 
+    margin-top: 0px;      
+  }
+
+  .buttons button {
+    width: 32%; 
+    margin: 5px; 
+    margin-top: 0px;
+  }
+
+  .buttons .reset-button {
+    margin-top: 0px;      
+  }  
+  textarea {
+    width: 100%;
+    padding: 10px;
+  }
+  .selection-info {
+      top: 180px;
+      right: 10px;
+  }
+
 }
+

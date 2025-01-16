@@ -26,7 +26,7 @@ const Board = () => {
   const [boardString, setBoardString] = useState(''); 
   const [openDialog, setOpenDialog] = useState(false); 
   const [winner, setWinner] = useState(null); 
-  const [blueAIEnabled, setBlueAIEnabled] = useState(false); 
+  const [blueAIEnabled, setBlueAIEnabled] = useState(true); 
   const [redAIEnabled, setRedAIEnabled] = useState(false); 
 
   const grid = generateBoard(rowPattern, startColumns);
@@ -131,6 +131,10 @@ const Board = () => {
 
   const loadBoardFromString = () => {
     const loadedGrid = generateBoardFromString(boardString);
+    if (loadedGrid === null) {
+      alert('Invalid board string');
+      return;
+    }
     setOccupantGrid(loadedGrid);
   };
 
@@ -155,11 +159,7 @@ const Board = () => {
               null
             }
           />
-          {selectedCircle && (
-            <div className="selection-info">
-              Row: {selectedCircle.row} Col: {selectedCircle.col}
-            </div>
-          )}
+          
         </div>
         <BoardStringInput
           boardString={boardString}
@@ -180,12 +180,7 @@ const Board = () => {
           />
         }
         label="Blue-AI"
-        sx={{
-          position: 'absolute',
-          top: 10,
-          left: 10,
-          zIndex: 10,
-        }}
+        className="form-control-label blue"
       />
 
       <FormControlLabel
@@ -198,12 +193,7 @@ const Board = () => {
           />
         }
         label="Red-AI"
-        sx={{
-          position: 'absolute',
-          top: 40,
-          left: 10,
-          zIndex: 10,
-        }}
+        className="form-control-label red"
       />
 
       <CongratulationsPopup 
@@ -212,6 +202,11 @@ const Board = () => {
         onClose={() => setWinner(null)} 
         onReset={resetBoard} 
       />
+      {selectedCircle && (
+            <div className="selection-info">
+              Row: {selectedCircle.row} Col: {selectedCircle.col}
+            </div>
+          )}
     </div>
   );
 };

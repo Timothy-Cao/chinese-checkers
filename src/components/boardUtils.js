@@ -61,6 +61,9 @@ export const getCircleColor = (occupant) => {
 };
 
 export const generateBoardFromString = (boardString) => {
+  if (boardString.length !== 815) {
+    return null
+  }
   const grid = [];
   const rows = boardString.split(';');
   rows.forEach((rowStr, rowIndex) => {

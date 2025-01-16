@@ -7,7 +7,8 @@ import BoardStringInput from './BoardStringInput';
 import Grid from './Grid';
 import CongratulationsPopup from './CongratulationsPopup';
 import { BlueAI } from './BlueAI'; 
- 
+import { RedAI } from './RedAI'; 
+
 const Board = () => {
   const gridWidth = 50;
   const gridHeight = 0.9 * gridWidth;
@@ -25,7 +26,8 @@ const Board = () => {
   const [boardString, setBoardString] = useState(''); 
   const [openDialog, setOpenDialog] = useState(false); 
   const [winner, setWinner] = useState(null); 
-  const [blueAIEnabled, setBlueAIEnabled] = useState(false); // State for Blue-AI toggle
+  const [blueAIEnabled, setBlueAIEnabled] = useState(false); 
+  const [redAIEnabled, setRedAIEnabled] = useState(false); 
 
   const grid = generateBoard(rowPattern, startColumns);
 
@@ -77,36 +79,42 @@ const Board = () => {
     if (checkWinner(newGrid, turn)) {
       setWinner(turn); 
       setOpenDialog(true); 
+      setBlueAIEnabled(false);
+      setRedAIEnabled(false);
     }
   };
 
-
-  useEffect(() => {
-    if (blueAIEnabled && turn === 2) { // Blue-AI only plays on the blue player's turn
-      const aiMove = BlueAI(occupantGrid); // Get AI move
-      if (aiMove) {
-        // Log the AI move
-        console.log("AI move selected:", aiMove);
-  
-        // Pass the selectedCircle and the destination row and col
-        const newGrid = handleMoveOnGrid(occupantGrid, aiMove.selectedCircle, aiMove.moveTo.row, aiMove.moveTo.col);
-  
-        goodSound.play();
-        setOccupantGrid(newGrid); // Update the grid
-        setSelectedCircle(aiMove.selectedCircle); // Set the selected circle to the AI's selected circle
-        setLegalMoves([]); // Clear legal moves
-        setTurn(1); // Switch turn to player 1
-  
-        if (checkWinner(newGrid, 2)) { // Check if Blue wins
-          setWinner(2);
-          setOpenDialog(true);
-        }
+  const performAIMove = (aiType) => {
+    const aiMove = aiType(occupantGrid);
+    if (aiMove) {
+      const newGrid = handleMoveOnGrid(occupantGrid, aiMove.selectedCircle, aiMove.moveTo.row, aiMove.moveTo.col);
+      goodSound.play();
+      setOccupantGrid(newGrid); 
+      setSelectedCircle(aiMove.selectedCircle); 
+      setLegalMoves([]); 
+      setTurn(turn === 1 ? 2 : 1); 
+      if (checkWinner(newGrid, turn)) {
+        setWinner(turn); 
+        setOpenDialog(true); 
       }
     }
+  };
+
+  useEffect(() => {
+    if (blueAIEnabled && turn === 2) {
+      setTimeout(() => {
+        performAIMove(BlueAI);
+      }, 200);
+    }
   }, [blueAIEnabled, turn, occupantGrid]);
-  
-  
-  
+
+  useEffect(() => {
+    if (redAIEnabled && turn === 1) {
+      setTimeout(() => {
+        performAIMove(RedAI); 
+      }, 200);
+    }
+  }, [redAIEnabled, turn, occupantGrid]);
 
   const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
 
@@ -139,7 +147,11 @@ const Board = () => {
             gridHeight={gridHeight}
             circleDiameter={circleDiameter}
             occupantGrid={occupantGrid}
-            aiMove={blueAIEnabled && turn === 2 ? BlueAI(occupantGrid) : null}
+            aiMove={
+              (blueAIEnabled && turn === 2) ? BlueAI(occupantGrid) :
+              (redAIEnabled && turn === 1) ? RedAI(occupantGrid) :
+              null
+            }
           />
           {selectedCircle && (
             <div className="selection-info">
@@ -169,6 +181,24 @@ const Board = () => {
         sx={{
           position: 'absolute',
           top: 10,
+          left: 10,
+          zIndex: 10,
+        }}
+      />
+
+      <FormControlLabel
+        control={
+          <Switch
+            checked={redAIEnabled}
+            onChange={() => setRedAIEnabled((prev) => !prev)}
+            name="RedAI"
+            color="primary"
+          />
+        }
+        label="Red-AI"
+        sx={{
+          position: 'absolute',
+          top: 40,
           left: 10,
           zIndex: 10,
         }}

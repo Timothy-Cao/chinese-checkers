@@ -8,24 +8,16 @@ function hexDistance(x1, y1, x2, y2) {
   return diagonalMoves + remainingMoves;
 }
 
-/**
- * BlueAI Differences:
- * 1. Blue prefers lower rows (opposite of red).
- * 2. Blue prefers target position (12, 10) instead of (4, 6).
- * 3. Blue has special hardcoded moves: (13, 10) -> (13, 9) and (13, 11) -> (13, 12).
- * 4. Blue uses player 2 instead of player 1.
- */
-export const BlueAI = (occupantGrid) => {
+export const RedAI = (occupantGrid) => {
   const legalMoves = [];
   
-  // Find all legal moves for Blue (Player 2)
   for (let row = 0; row < occupantGrid.length; row++) {
     for (let col = 0; col < occupantGrid[row].length; col++) {
-      if (occupantGrid[row][col] === 2) { // Blue player's pieces are marked as 2
-        const possibleMoves = getLegalMoves(row, col, 2, occupantGrid);
+      if (occupantGrid[row][col] === 1) { // Red player's pieces are marked as 1
+        const possibleMoves = getLegalMoves(row, col, 1, occupantGrid);
         if (possibleMoves.length > 0) {
           legalMoves.push({
-            selectedCircle: { row, col, occupant: 2 },
+            selectedCircle: { row, col, occupant: 1 },
             possibleMoves
           });
         }
@@ -36,16 +28,16 @@ export const BlueAI = (occupantGrid) => {
   if (legalMoves.length === 0) return null;
 
   let bestMove = null;
-  let bestRowDiff = Infinity; // Blue prefers lower rows, so start with a high value
-  const targetRow = 12; // Blue AI target row
-  const targetCol = 10; // Blue AI target column
+  let bestRowDiff = -Infinity; // To pick the largest rowDiff
+  const targetRow = 4; // Red AI target row
+  const targetCol = 6; // Red AI target column
 
-  // Step 1: Hardcode special priority moves for (13,10) -> (13,9) and (13,11) -> (13,12)
+  // Step 1: Hardcode special priority moves for (3,5) -> (3,4) and (3,6) -> (3,7)
   for (const { selectedCircle, possibleMoves } of legalMoves) {
     for (const move of possibleMoves) {
       // Check for specific hardcoded moves first
-      if ((selectedCircle.row === 13 && selectedCircle.col === 10 && move.row === 13 && move.col === 9) || 
-          (selectedCircle.row === 13 && selectedCircle.col === 11 && move.row === 13 && move.col === 12)) {
+      if ((selectedCircle.row === 3 && selectedCircle.col === 5 && move.row === 3 && move.col === 4) || 
+          (selectedCircle.row === 3 && selectedCircle.col === 6 && move.row === 3 && move.col === 7)) {
         // Ensure it's a legal move before giving it priority
         bestMove = { selectedCircle, moveTo: { row: move.row, col: move.col } };
         return bestMove; // Immediately return this best move
@@ -56,17 +48,17 @@ export const BlueAI = (occupantGrid) => {
   // Step 2: Find the best move based on row difference
   for (const { selectedCircle, possibleMoves } of legalMoves) {
     for (const move of possibleMoves) {
-      const rowDiff = -(move.row - selectedCircle.row); // Positive rowDiff for moving downward
+      const rowDiff = - (move.row - selectedCircle.row);
 
-      // Step 1: Prioritize best row difference (blue prefers lower rows)
-      if (rowDiff < bestRowDiff) {
+      // Step 1: Prioritize best row difference
+      if (rowDiff > bestRowDiff) {
         bestRowDiff = rowDiff;
         bestMove = { selectedCircle, moveTo: { row: move.row, col: move.col } };
       } 
-      // Step 2: If rowDiff is tied, choose the one with the lowest starting row and closest to target
+      // Step 2: If rowDiff is tied, choose the one with the highest starting row and closest to target
       else if (rowDiff === bestRowDiff) {
-        // Select the lowest starting row among the contenders
-        if (selectedCircle.row < bestMove.selectedCircle.row) {
+        // Select the highest starting row among the contenders
+        if (selectedCircle.row > bestMove.selectedCircle.row) {
           bestMove = { selectedCircle, moveTo: { row: move.row, col: move.col } };
         } 
         // If the starting row is tied, prioritize the move closest to the target

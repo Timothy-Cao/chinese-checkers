@@ -1,0 +1,386 @@
+/* ============================================
+   Strategy Analysis Page — Dark Theme
+   ============================================ */
+
+.strategy-page {
+  min-height: 100vh;
+  background: #0a0a0f;
+  color: rgba(255, 255, 255, 0.85);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.strategy-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* --- Navigation --- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  font-size: 0.8rem;
+  margin-bottom: 32px;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* --- Hero --- */
+
+.strategy-hero {
+  margin-bottom: 48px;
+}
+
+.strategy-hero h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.strategy-hero .subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* --- Sections --- */
+
+.strategy-section {
+  margin-bottom: 48px;
+}
+
+.strategy-section h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.01em;
+}
+
+.strategy-section h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 24px 0 10px 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.strategy-section p {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 12px 0;
+}
+
+.strategy-section strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.strategy-section em {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.strategy-section code {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.strategy-section ul {
+  padding-left: 20px;
+  margin: 8px 0 12px;
+}
+
+.strategy-section li {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+}
+
+/* --- Strategy Cards --- */
+
+.strategy-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.strategy-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.strategy-card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.strategy-badge {
+  font-size: 0.68rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.badge-weak {
+  background: rgba(239, 68, 68, 0.12);
+  color: rgba(239, 68, 68, 0.8);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.badge-medium {
+  background: rgba(250, 204, 21, 0.1);
+  color: rgba(250, 204, 21, 0.8);
+  border: 1px solid rgba(250, 204, 21, 0.15);
+}
+
+.badge-strong {
+  background: rgba(74, 222, 128, 0.1);
+  color: rgba(74, 222, 128, 0.8);
+  border: 1px solid rgba(74, 222, 128, 0.15);
+}
+
+.badge-best {
+  background: rgba(59, 130, 246, 0.12);
+  color: rgba(59, 130, 246, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.strategy-card .complexity {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 8px;
+}
+
+/* --- Data Table --- */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin: 16px 0;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.win-red { color: #ef4444; font-weight: 500; }
+.win-blue { color: #3b82f6; font-weight: 500; }
+.win-tie { color: rgba(255, 255, 255, 0.3); }
+
+/* --- Bar Charts --- */
+
+.bar-chart {
+  margin: 20px 0;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.bar-label {
+  width: 160px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.bar-fill-red {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  color: white;
+  font-weight: 500;
+  min-width: 28px;
+  transition: width 0.6s ease;
+}
+
+.bar-fill-blue {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  color: white;
+  font-weight: 500;
+  min-width: 28px;
+  transition: width 0.6s ease;
+}
+
+.bar-fill-gray {
+  background: rgba(255, 255, 255, 0.08);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+  min-width: 20px;
+}
+
+/* --- Oscillation Trace --- */
+
+.trace-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.5);
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.trace-box .highlight {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* --- Direction Grid (hex math) --- */
+
+.hex-grid-visual {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(3, 36px);
+  gap: 2px;
+  margin: 12px 0;
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.hex-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hex-cell.active {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hex-cell.center {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.hex-cell.disabled {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Insight Callout --- */
+
+.insight-box {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 16px 0;
+}
+
+.insight-box p {
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+/* --- Divider --- */
+
+.section-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 48px 0;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 600px) {
+  .strategy-content {
+    padding: 24px 16px 60px;
+  }
+
+  .strategy-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .bar-label {
+    width: 100px;
+    font-size: 0.68rem;
+  }
+
+  .data-table {
+    font-size: 0.72rem;
+  }
+
+  .data-table th, .data-table td {
+    padding: 8px 6px;
+  }
+
+  .strategy-card {
+    padding: 14px 16px;
+  }
+}

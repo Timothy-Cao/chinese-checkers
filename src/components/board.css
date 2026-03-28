@@ -399,6 +399,49 @@
   }
 }
 
+/* --- Upscale for large screens --- */
+
+@media (min-height: 950px) and (min-width: 900px) {
+  .cell {
+    width: 50px;
+    height: 45px;
+  }
+
+  .board-grid {
+    padding: 24px 28px;
+  }
+}
+
+@media (min-height: 1100px) and (min-width: 1100px) {
+  .cell {
+    width: 58px;
+    height: 52px;
+  }
+
+  .board-grid {
+    padding: 28px 32px;
+  }
+
+  .circle.piece-red {
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  .circle.piece-blue {
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@media (min-height: 1400px) and (min-width: 1400px) {
+  .cell {
+    width: 68px;
+    height: 62px;
+  }
+
+  .board-grid {
+    padding: 32px 36px;
+  }
+}
+
 /* Height-based scaling for the board — ensures it fits any screen */
 @media (max-height: 850px) {
   .cell {

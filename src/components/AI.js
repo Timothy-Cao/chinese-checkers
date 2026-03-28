@@ -441,6 +441,115 @@ function minimaxStrategy(occupantGrid, player) {
   return bestMove;
 }
 
+// --- Beam Search ---
+// Combines multi-turn lookahead with adversarial awareness.
+//
+// Strategy: For each candidate first move, simulate a short sequence of
+// alternating (our move, opponent response) pairs. Aggregate the best
+// achievable score across all continuations for each first move.
+// Pick the first move with the best worst-case future.
+//
+// This discovers chain-jump setups that single-move evaluation misses:
+// "move A sideways now → opponent moves → jump B over A next turn"
+function beamSearchStrategy(occupantGrid, player) {
+  const allMoves = getAllMoves(occupantGrid, player);
+  if (allMoves.length === 0) return null;
+
+  const opp = opponent(player);
+  const flat = flattenMoves(allMoves);
+
+  // Phase 1: Score all first moves with positional eval
+  const firstMoveScored = flat.map((move) => {
+    const newGrid = handleMoveOnGrid(occupantGrid, move.selectedCircle, move.moveTo.row, move.moveTo.col);
+    const myDist = evaluateBoard(newGrid, player);
+    const oppDist = evaluateBoard(newGrid, opp);
+    return { move, grid: newGrid, score: myDist - oppDist, myDist };
+  });
+  firstMoveScored.sort((a, b) => a.score - b.score);
+
+  // Take top 10 first moves for deeper search
+  const topFirst = firstMoveScored.slice(0, Math.min(10, firstMoveScored.length));
+
+  // Phase 2: For each first move, simulate 2 more rounds (our move + opp response)
+  // and find the best achievable score after 3 of our moves
+  let bestMove = null;
+  let bestScore = Infinity;
+
+  for (const first of topFirst) {
+    // Round 1: opponent responds to our first move
+    const oppReply1 = quickOppResponse(first.grid, opp);
+    const afterOpp1 = oppReply1
+      ? handleMoveOnGrid(first.grid, oppReply1.selectedCircle, oppReply1.moveTo.row, oppReply1.moveTo.col)
+      : first.grid;
+
+    // Round 2: our second move (pick top 5)
+    const round2Moves = getAllMoves(afterOpp1, player);
+    const round2Flat = flattenMoves(round2Moves);
+    const round2Scored = round2Flat.map((m) => {
+      const g = handleMoveOnGrid(afterOpp1, m.selectedCircle, m.moveTo.row, m.moveTo.col);
+      return { grid: g, myDist: evaluateBoard(g, player) };
+    });
+    round2Scored.sort((a, b) => a.myDist - b.myDist);
+    const topRound2 = round2Scored.slice(0, Math.min(5, round2Scored.length));
+
+    // Round 2: opponent responds, then our third move
+    let bestFuture = Infinity;
+    for (const r2 of topRound2) {
+      const oppReply2 = quickOppResponse(r2.grid, opp);
+      const afterOpp2 = oppReply2
+        ? handleMoveOnGrid(r2.grid, oppReply2.selectedCircle, oppReply2.moveTo.row, oppReply2.moveTo.col)
+        : r2.grid;
+
+      // Round 3: our third move (just pick the best one)
+      const round3Moves = getAllMoves(afterOpp2, player);
+      const round3Flat = flattenMoves(round3Moves);
+      let bestR3 = Infinity;
+      for (const m of round3Flat) {
+        const g = handleMoveOnGrid(afterOpp2, m.selectedCircle, m.moveTo.row, m.moveTo.col);
+        const dist = evaluateBoard(g, player);
+        if (dist < bestR3) bestR3 = dist;
+      }
+      if (round3Flat.length === 0) bestR3 = evaluateBoard(afterOpp2, player);
+
+      if (bestR3 < bestFuture) bestFuture = bestR3;
+    }
+
+    // Combine: weight immediate score (70%) + future potential (30%)
+    // This prevents sacrificing the present for a speculative future
+    const combinedScore = 0.7 * first.myDist + 0.3 * bestFuture;
+    const jitter = Math.random() * 0.01;
+
+    if (combinedScore + jitter < bestScore) {
+      bestScore = combinedScore + jitter;
+      bestMove = first.move;
+    }
+  }
+
+  return bestMove || flat[0];
+}
+
+// Quick opponent response for beam search simulation.
+// Uses positional eval to pick opponent's best single move.
+function quickOppResponse(occupantGrid, oppPlayer) {
+  const moves = getAllMoves(occupantGrid, oppPlayer);
+  if (moves.length === 0) return null;
+
+  const flat = flattenMoves(moves);
+  let bestMove = null;
+  let bestScore = Infinity;
+
+  for (const move of flat) {
+    const newGrid = handleMoveOnGrid(occupantGrid, move.selectedCircle, move.moveTo.row, move.moveTo.col);
+    const score = evaluateBoard(newGrid, oppPlayer);
+    if (score < bestScore) {
+      bestScore = score;
+      bestMove = move;
+    }
+  }
+
+  return bestMove;
+}
+
 // ========== Registry ==========
 
 const strategies = {
@@ -449,6 +558,7 @@ const strategies = {
   positional: positionalStrategy,
   pathfinder: pathfinderStrategy,
   minimax: minimaxStrategy,
+  beam: beamSearchStrategy,
 };
 
 export const AI_LEVELS = Object.keys(strategies);
@@ -459,6 +569,7 @@ export const AI_LEVEL_NAMES = {
   positional: 'Positional',
   pathfinder: 'Pathfinder',
   minimax: 'Minimax',
+  beam: 'Beam Search',
 };
 
 // Main entry point

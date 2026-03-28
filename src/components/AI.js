@@ -277,7 +277,7 @@ function greedyStrategy(occupantGrid, player) {
         } else if (fromDistToGoal === bestFromDistToGoal) {
           const currentDist = hexDistance(bestMove.moveTo.row, bestMove.moveTo.col, goalCenter.row, goalCenter.col);
           const newDist = hexDistance(move.row, move.col, goalCenter.row, goalCenter.col);
-          if (newDist < currentDist) {
+          if (newDist < currentDist || (newDist === currentDist && Math.random() < 0.5)) {
             bestMove = { selectedCircle: from, moveTo: { row: move.row, col: move.col } };
           }
         }

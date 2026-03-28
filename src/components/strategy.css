@@ -213,6 +213,31 @@
 .win-blue { color: #3b82f6; font-weight: 500; }
 .win-tie { color: rgba(255, 255, 255, 0.3); }
 
+/* --- Win Rate Matrix --- */
+
+.matrix-table {
+  text-align: center;
+}
+
+.matrix-table th {
+  text-align: center;
+  font-size: 0.68rem;
+}
+
+.matrix-table td {
+  text-align: center;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix-table td:first-child {
+  text-align: left;
+}
+
+.matrix-diagonal {
+  color: rgba(255, 255, 255, 0.1);
+}
+
 /* --- Bar Charts --- */
 
 .bar-chart {

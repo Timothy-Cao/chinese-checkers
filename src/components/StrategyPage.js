@@ -1,36 +1,36 @@
 import React from 'react';
 import './strategy.css';
 
-const benchmarks = [
-  { red: 'Random', blue: 'Greedy', rw: 0, bw: 100, ties: 0, avg: 120 },
-  { red: 'Random', blue: 'Positional', rw: 0, bw: 18, ties: 82, avg: 182 },
-  { red: 'Greedy', blue: 'Greedy', rw: 100, bw: 0, ties: 0, avg: 64 },
-  { red: 'Greedy', blue: 'Positional', rw: 50, bw: 47, ties: 3, avg: 72 },
-  { red: 'Greedy', blue: 'Pathfinder', rw: 2, bw: 98, ties: 0, avg: 73 },
-  { red: 'Greedy', blue: 'Minimax', rw: 0, bw: 100, ties: 0, avg: 53 },
-  { red: 'Positional', blue: 'Pathfinder', rw: 52, bw: 47, ties: 1, avg: 63 },
-  { red: 'Positional', blue: 'Minimax', rw: 33, bw: 66, ties: 1, avg: 63 },
-  { red: 'Pathfinder', blue: 'Minimax', rw: 28, bw: 72, ties: 0, avg: 61 },
-  { red: 'Beam', blue: 'Greedy', rw: 100, bw: 0, ties: 0, avg: 51 },
-  { red: 'Beam', blue: 'Positional', rw: 100, bw: 0, ties: 0, avg: 52 },
-  { red: 'Beam', blue: 'Minimax', rw: 30, bw: 70, ties: 0, avg: 50 },
-  { red: 'Minimax', blue: 'Beam', rw: 15, bw: 85, ties: 0, avg: 55 },
-];
+// Win rate matrix: each cell shows row-strategy's win % against column-strategy.
+// 100 games per matchup (50 as Red + 50 as Blue) to normalize first-mover advantage.
+const strategies = ['Random', 'Greedy', 'Positional', 'Pathfinder', 'Minimax', 'Beam'];
+// Lower triangle only (row > col). Value = row-strategy's win%.
+const winMatrix = {
+  '1,0': 21,  // Greedy vs Random
+  '2,0': 13,  // Positional vs Random
+  '2,1': 62,  // Positional vs Greedy
+  '3,0': 37,  // Pathfinder vs Random
+  '3,1': 51,  // Pathfinder vs Greedy
+  '3,2': 43,  // Pathfinder vs Positional
+  '4,0': 10,  // Minimax vs Random
+  '4,1': 88,  // Minimax vs Greedy
+  '4,2': 68,  // Minimax vs Positional
+  '4,3': 74,  // Minimax vs Pathfinder
+  '5,0': 13,  // Beam vs Random
+  '5,1': 91,  // Beam vs Greedy
+  '5,2': 87,  // Beam vs Positional
+  '5,3': 83,  // Beam vs Pathfinder
+  '5,4': 50,  // Beam vs Minimax
+};
 
-const BarChart = ({ data }) => (
-  <div className="bar-chart">
-    {data.map((row, i) => (
-      <div className="bar-row" key={i}>
-        <div className="bar-label">{row.red} vs {row.blue}</div>
-        <div className="bar-track">
-          {row.rw > 0 && <div className="bar-fill-red" style={{ width: `${row.rw}%` }}>{row.rw}%</div>}
-          {row.bw > 0 && <div className="bar-fill-blue" style={{ width: `${row.bw}%` }}>{row.bw}%</div>}
-          {row.ties > 0 && <div className="bar-fill-gray" style={{ width: `${row.ties}%` }}>{row.ties}%</div>}
-        </div>
-      </div>
-    ))}
-  </div>
-);
+function cellColor(val) {
+  if (val === null) return {};
+  if (val >= 75) return { color: '#4ade80', fontWeight: 500 };
+  if (val >= 60) return { color: '#86efac' };
+  if (val >= 40) return { color: 'rgba(255,255,255,0.5)' };
+  if (val >= 25) return { color: '#fca5a5' };
+  return { color: '#ef4444', fontWeight: 500 };
+}
 
 const StrategyPage = ({ onBackToGame }) => {
   return (
@@ -347,36 +347,41 @@ const StrategyPage = ({ onBackToGame }) => {
         <div className="strategy-section">
           <h2>Benchmark Results</h2>
           <p>
-            100 games per matchup, 200 move limit. Red always moves first.
-            Bar chart shows win rate distribution (red = Red wins, blue = Blue wins, gray = ties).
+            100 games per matchup (50 as each color), 200 move limit.
+            Each cell shows the <strong>row strategy's win rate</strong> against the column strategy.
+            Remaining percentage is ties (mostly Random matchups timing out).
           </p>
 
-          <BarChart data={benchmarks} />
-
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Red</th>
-                <th>Blue</th>
-                <th>Red Wins</th>
-                <th>Blue Wins</th>
-                <th>Ties</th>
-                <th>Avg Moves</th>
-              </tr>
-            </thead>
-            <tbody>
-              {benchmarks.map((row, i) => (
-                <tr key={i}>
-                  <td><strong>{row.red}</strong></td>
-                  <td><strong>{row.blue}</strong></td>
-                  <td className={row.rw >= 50 ? 'win-red' : ''}>{row.rw}%</td>
-                  <td className={row.bw >= 50 ? 'win-blue' : ''}>{row.bw}%</td>
-                  <td className={row.ties > 0 ? 'win-tie' : ''}>{row.ties}%</td>
-                  <td>{row.avg}</td>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table matrix-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  {strategies.map((s) => <th key={s}>{s.slice(0, 4)}</th>)}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {strategies.map((rowS, r) => (
+                  <tr key={rowS}>
+                    <td><strong>{rowS}</strong></td>
+                    {strategies.map((colS, c) => {
+                      if (r === c) return <td key={c} className="matrix-diagonal">--</td>;
+                      const key = r > c ? `${r},${c}` : `${c},${r}`;
+                      const raw = winMatrix[key];
+                      // If row > col, raw is row's win%. If row < col, raw is col's win%, so row's is (100-raw) adjusted for ties.
+                      const val = r > c ? raw : (raw !== undefined ? 100 - raw : null);
+                      if (val === null) return <td key={c}>-</td>;
+                      return <td key={c} style={cellColor(val)}>{val}%</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+            Read across: row beats column at the shown rate. Green = dominant, red = weak.
+          </p>
         </div>
 
         <hr className="section-divider" />
@@ -386,33 +391,33 @@ const StrategyPage = ({ onBackToGame }) => {
           <h2>Key Insights</h2>
 
           <div className="insight-box">
-            <p><strong>Beam Search is the strongest.</strong> 100% vs Greedy, 100% vs Positional, ~58% vs Minimax.
-            Multi-turn lookahead discovers chain-jump setups that no single-move strategy can see.</p>
+            <p><strong>Beam Search and Minimax are co-champions.</strong> Beam dominates Greedy (91%), Positional (87%),
+            and Pathfinder (83%), but ties Minimax at 50-50. Both are the strongest, with different strengths:
+            Beam sees multi-turn setups, Minimax reacts to opponent threats.</p>
           </div>
 
           <div className="insight-box">
-            <p><strong>Positional ≈ Pathfinder.</strong> Despite being 50× slower, Pathfinder barely edges out Positional
-            (52-47). The board is open enough that hexDistance closely approximates actual shortest paths.
-            Blocking is less impactful than intuition suggests.</p>
+            <p><strong>Minimax is the best value.</strong> At ~90ms/move it beats Positional (68%), Pathfinder (74%),
+            and ties Beam — which takes ~1s/move. Considering the opponent's response is the single
+            highest-impact improvement over pure position evaluation.</p>
           </div>
 
           <div className="insight-box">
-            <p><strong>Greedy + fallback is surprisingly competitive.</strong> With the positional fallback for stuck states,
-            Greedy matches Positional at 50-47. The fast forward-rush strategy is effective because
-            it creates jump chains that Positional's evaluation doesn't fully capture.</p>
+            <p><strong>Positional ≈ Pathfinder.</strong> Despite being 50× slower, Pathfinder loses to Positional 43-56.
+            The board is open enough that hexDistance closely approximates real shortest paths.
+            BFS blocking detection doesn't justify the computational cost.</p>
           </div>
 
           <div className="insight-box">
-            <p><strong>First-mover advantage exists.</strong> Red (first mover) wins ~5-10% more often across matchups.
-            In Greedy vs Greedy, Red wins 100% — identical strategies, but going first is enough to always
-            stay one step ahead.</p>
+            <p><strong>Random is a chaos agent.</strong> It never wins but creates massive tie rates (63-90%) by
+            scattering pieces unpredictably. Even Minimax only beats Random 10% of the time — the rest
+            are 200-move timeouts where the AI can't navigate around random obstacles.</p>
           </div>
 
           <div className="insight-box">
-            <p><strong>Speed vs strength tradeoff.</strong> Beam Search at ~1s/move is the strongest but slowest.
-            Minimax at 90ms/move is the best balance. Pathfinder at 700ms/move delivers marginal
-            improvement over Positional at 15ms/move. Thinking ahead (Beam) beats thinking about
-            the opponent (Minimax) beats thinking harder about yourself (Pathfinder).</p>
+            <p><strong>Thinking ahead &gt; thinking harder &gt; thinking about yourself.</strong> Beam (multi-turn planning)
+            and Minimax (adversarial) dominate. Pathfinder (better distance metric) barely helps.
+            Greedy (simple heuristic) is surprisingly competitive at 49% vs Pathfinder.</p>
           </div>
         </div>
 

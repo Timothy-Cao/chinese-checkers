@@ -11,6 +11,10 @@ const benchmarks = [
   { red: 'Positional', blue: 'Pathfinder', rw: 52, bw: 47, ties: 1, avg: 63 },
   { red: 'Positional', blue: 'Minimax', rw: 33, bw: 66, ties: 1, avg: 63 },
   { red: 'Pathfinder', blue: 'Minimax', rw: 28, bw: 72, ties: 0, avg: 61 },
+  { red: 'Beam', blue: 'Greedy', rw: 100, bw: 0, ties: 0, avg: 51 },
+  { red: 'Beam', blue: 'Positional', rw: 100, bw: 0, ties: 0, avg: 52 },
+  { red: 'Beam', blue: 'Minimax', rw: 30, bw: 70, ties: 0, avg: 50 },
+  { red: 'Minimax', blue: 'Beam', rw: 15, bw: 85, ties: 0, avg: 55 },
 ];
 
 const BarChart = ({ data }) => (
@@ -37,14 +41,14 @@ const StrategyPage = ({ onBackToGame }) => {
         {/* Hero */}
         <div className="strategy-hero">
           <h1>AI Strategy Analysis</h1>
-          <p className="subtitle">How five algorithms compete at Chinese Checkers — Long Jump Variation</p>
+          <p className="subtitle">How six algorithms compete at Chinese Checkers — Long Jump Variation</p>
         </div>
 
         {/* Overview */}
         <div className="strategy-section">
-          <h2>The Five Strategies</h2>
+          <h2>The Six Strategies</h2>
           <p>
-            We built five AI strategies of increasing sophistication, from purely random play to
+            We built six AI strategies of increasing sophistication, from purely random play to
             adversarial search. Each makes fundamentally different assumptions about what constitutes
             a "good" move. The results reveal surprising insights about when complexity helps — and
             when it doesn't.
@@ -64,7 +68,8 @@ const StrategyPage = ({ onBackToGame }) => {
               <tr><td><strong>Greedy</strong></td><td>Max forward row progress</td><td>{'<'}1ms</td><td><span className="strategy-badge badge-medium">Medium</span></td></tr>
               <tr><td><strong>Positional</strong></td><td>Minimize total piece-to-goal distance</td><td>~15ms</td><td><span className="strategy-badge badge-strong">Strong</span></td></tr>
               <tr><td><strong>Pathfinder</strong></td><td>BFS real shortest paths</td><td>~700ms</td><td><span className="strategy-badge badge-strong">Strong</span></td></tr>
-              <tr><td><strong>Minimax</strong></td><td>2-ply adversarial search</td><td>~90ms</td><td><span className="strategy-badge badge-best">Best</span></td></tr>
+              <tr><td><strong>Minimax</strong></td><td>2-ply adversarial search</td><td>~90ms</td><td><span className="strategy-badge badge-strong">Strong</span></td></tr>
+              <tr><td><strong>Beam Search</strong></td><td>3-round lookahead with opponent sim</td><td>~1s</td><td><span className="strategy-badge badge-best">Best</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -171,10 +176,10 @@ const StrategyPage = ({ onBackToGame }) => {
           <div className="strategy-card">
             <div className="strategy-card-header">
               <h3>Minimax</h3>
-              <span className="strategy-badge badge-best">Best</span>
+              <span className="strategy-badge badge-strong">Strong</span>
             </div>
             <p>
-              The only strategy that considers the <strong>opponent's response</strong>. Uses depth-2 adversarial
+              The only single-move strategy that considers the <strong>opponent's response</strong>. Uses depth-2 adversarial
               search: for each of my candidate moves, simulate the board, then for each of the opponent's
               best responses, evaluate the resulting position.
             </p>
@@ -193,6 +198,40 @@ const StrategyPage = ({ onBackToGame }) => {
               The net score is <code>myDistance - opponentDistance</code>, capturing both offense and defense.
             </p>
             <div className="complexity">Complexity: O(K₁ × K₂ × eval) ≈ 48 board evaluations per move</div>
+          </div>
+
+          {/* Beam Search */}
+          <div className="strategy-card">
+            <div className="strategy-card-header">
+              <h3>Beam Search</h3>
+              <span className="strategy-badge badge-best">Best</span>
+            </div>
+            <p>
+              The strongest strategy. Combines <strong>multi-turn lookahead</strong> with adversarial awareness.
+              For each candidate first move, simulates 3 rounds of alternating play: our move, opponent's
+              best response, our next move, opponent's response, our third move.
+            </p>
+            <p>
+              This discovers <strong>chain-jump setups</strong> that single-move evaluation completely misses.
+              For example: "move piece A sideways now (looks worse), then next turn jump piece B
+              over A to leap multiple rows forward."
+            </p>
+            <p>
+              The final score combines <strong>immediate position (70%)</strong> with <strong>best achievable future (30%)</strong>.
+              This prevents sacrificing the present for speculative multi-turn plans while still rewarding
+              moves that create future opportunities.
+            </p>
+            <p>
+              Top-10 first moves are expanded, with top-5 continuations at each depth. The opponent
+              simulation uses positional evaluation for speed.
+            </p>
+            <div className="insight-box">
+              <p>
+                <strong>Result:</strong> Beam Search beats every other strategy. 100% vs Greedy, 100% vs Positional,
+                and ~58% vs Minimax overall. The multi-turn vision is decisive.
+              </p>
+            </div>
+            <div className="complexity">Complexity: O(10 × 5 × 2 × eval) ≈ 100+ board evaluations per move, ~1s</div>
           </div>
         </div>
 
@@ -347,8 +386,8 @@ const StrategyPage = ({ onBackToGame }) => {
           <h2>Key Insights</h2>
 
           <div className="insight-box">
-            <p><strong>Minimax dominates everything.</strong> 100% vs Greedy, 66% vs Positional, 72% vs Pathfinder.
-            The only strategy that considers what the opponent will do — and it matters enormously.</p>
+            <p><strong>Beam Search is the strongest.</strong> 100% vs Greedy, 100% vs Positional, ~58% vs Minimax.
+            Multi-turn lookahead discovers chain-jump setups that no single-move strategy can see.</p>
           </div>
 
           <div className="insight-box">
@@ -370,9 +409,10 @@ const StrategyPage = ({ onBackToGame }) => {
           </div>
 
           <div className="insight-box">
-            <p><strong>Speed vs strength tradeoff.</strong> Minimax at 90ms/move delivers the best results.
-            Pathfinder at 700ms/move delivers marginal improvement over Positional at 15ms/move.
-            The lesson: thinking about the opponent (Minimax) beats thinking harder about yourself (Pathfinder).</p>
+            <p><strong>Speed vs strength tradeoff.</strong> Beam Search at ~1s/move is the strongest but slowest.
+            Minimax at 90ms/move is the best balance. Pathfinder at 700ms/move delivers marginal
+            improvement over Positional at 15ms/move. Thinking ahead (Beam) beats thinking about
+            the opponent (Minimax) beats thinking harder about yourself (Pathfinder).</p>
           </div>
         </div>
 

@@ -319,6 +319,25 @@
   color: #ef4444;
 }
 
+/* --- Reset Button --- */
+
+.reset-btn {
+  margin-top: 4px;
+  padding: 5px 0;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 6px;
+  color: rgba(239, 68, 68, 0.7);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
 /* --- Strategy Toggle Button --- */
 
 .strategy-toggle {

@@ -14,9 +14,6 @@ const Grid = ({
   legalMoves,
   handleCircleSelect,
   handleMove,
-  gridWidth,
-  gridHeight,
-  circleDiameter,
   occupantGrid,
   turnColor,
 }) => {

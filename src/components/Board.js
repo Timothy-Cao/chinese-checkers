@@ -10,7 +10,6 @@ import CongratulationsPopup from './CongratulationsPopup';
 import { getAIMove, AI_LEVELS, AI_LEVEL_NAMES } from './AI';
 import {
   ROWS, COLS, ROW_PATTERN, START_COLUMNS,
-  GRID_WIDTH, GRID_HEIGHT, CIRCLE_DIAMETER,
   PLAYER_RED, PLAYER_BLUE,
 } from './constants';
 
@@ -230,25 +229,7 @@ const Board = ({ onShowStrategy }) => {
             </div>
           )}
 
-          <button
-            onClick={resetBoard}
-            style={{
-              marginTop: 4,
-              padding: '5px 0',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.15)',
-              borderRadius: 6,
-              color: 'rgba(239, 68, 68, 0.7)',
-              cursor: 'pointer',
-              fontSize: '0.72rem',
-              fontFamily: 'inherit',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.2)'}
-            onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
-          >
-            Reset
-          </button>
+          <button className="reset-btn" onClick={resetBoard}>Reset</button>
         </div>
       </div>
 
@@ -261,9 +242,6 @@ const Board = ({ onShowStrategy }) => {
             legalMoves={legalMoves}
             handleCircleSelect={handleCircleSelect}
             handleMove={handleMove}
-            gridWidth={GRID_WIDTH}
-            gridHeight={GRID_HEIGHT}
-            circleDiameter={CIRCLE_DIAMETER}
             occupantGrid={occupantGrid}
             turnColor={turnColor}
           />

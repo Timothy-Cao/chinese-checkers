@@ -29,11 +29,6 @@ export const BLUE_HOME = [
 export const RED_GOAL = BLUE_HOME;
 export const BLUE_GOAL = RED_HOME;
 
-// Grid display
-export const GRID_WIDTH = 42;
-export const GRID_HEIGHT = 0.9 * GRID_WIDTH;
-export const CIRCLE_DIAMETER = 0.78 * GRID_WIDTH;
-
 // 6 movement directions on hex-like grid
 export const DIRECTIONS = [
   { row: -1, col: 0 },   // up

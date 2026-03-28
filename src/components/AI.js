@@ -377,7 +377,7 @@ function minimaxStrategy(occupantGrid, player) {
 
   const topK = Math.min(8, scored.length);
   let bestMove = null;
-  let alpha = -Infinity; // best score we can guarantee (we want to MINIMIZE our distance, MAXIMIZE opponent's)
+  let alpha = Infinity; // best (lowest) net score found so far
 
   for (let i = 0; i < topK; i++) {
     const { move } = scored[i];
@@ -422,17 +422,10 @@ function minimaxStrategy(occupantGrid, player) {
       }
     }
 
-    // We want to MAXIMIZE our worst-case net eval
-    // (i.e., minimize the gap where net = myDist - oppDist, lower is better for us,
-    //  so we want the move where the opponent's best reply still leaves us best off)
-    // Actually: we want min(myDist) relative to opponent. Since lower myDist is better,
-    // and worstCaseForUs = myDist - oppDist, we want to MINIMIZE worstCaseForUs.
-    // But wait — opponent picks THEIR best move which hurts us most.
-    // So for each of our moves, worstCaseForUs is the NET score after opponent's best response.
-    // We pick OUR move that minimizes this worst case.
-
+    // Pick the move whose worst case (after opponent's best reply) is lowest.
+    // Lower net = myDist - oppDist means we're closer to goal relative to opponent.
     const jitter = Math.random() * 0.001;
-    if (worstCaseForUs + jitter < alpha || bestMove === null) {
+    if (worstCaseForUs + jitter < alpha) {
       alpha = worstCaseForUs;
       bestMove = move;
     }

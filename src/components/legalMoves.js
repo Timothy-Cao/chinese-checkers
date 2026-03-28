@@ -1,101 +1,88 @@
+import { DIRECTIONS } from './constants';
+
 const boundarySet = new Set([
   '0,3', '0,5', '1,3', '1,6', '2,3', '2,7', '3,3', '3,8',
   '4,-1', '4,13', '5,0', '5,13', '6,1', '6,13', '7,2', '7,13',
   '8,3', '8,13', '9,3', '9,14', '10,3', '10,15', '11,3', '11,16',
   '12,3', '12,17', '13,8', '13,13', '14,9', '14,13', '15,10', '15,13',
   '16,11', '16,13',
-
-
   '13,14', '13,15', '13,16', '13,17', '13,4', '13,5', '13,6', '13,7',
-  '3,-1', '3,0', '3,1', '3,2', '3,9', '3,10', '3,11', '3,12'
+  '3,-1', '3,0', '3,1', '3,2', '3,9', '3,10', '3,11', '3,12',
 ]);
+
+function isInBounds(row, col, grid) {
+  return row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
+}
+
+function isBlocked(row, col) {
+  return boundarySet.has(`${row},${col}`);
+}
 
 export function getLegalMoves(row, col, occupant, grid) {
   const legalMoves = [];
-  const directions = [
-    { row: -1, col: 0 }, 
-    { row: 1, col: 0 }, 
-    { row: 0, col: -1 },
-    { row: 0, col: 1 },  
-    { row: -1, col: -1 }, 
-    { row: 1, col: 1 },  
-  ];
 
-  // Helper function to perform BFS for multi-jumping
-  const bfsJump = (startRow, startCol, occupant) => {
-    const queue = [{ row: startRow, col: startCol, path: [] }];
-    const visited = new Set([`${startRow},${startCol}`]);
-    const validJumps = [];
-
-    while (queue.length > 0) {
-      const { row, col, path } = queue.shift();
-
-      directions.forEach((direction) => {
-        let currentRow = row + direction.row;
-        let currentCol = col + direction.col;
-        const occupancyArray = [{ occupant, row, col }];
-
-        while (currentRow >= 0 && currentRow < grid.length && currentCol >= 0 && currentCol < grid[0].length) {
-          const occupantAtCurrent = grid[currentRow][currentCol];
-          if (boundarySet.has(`${currentRow},${currentCol}`)) break;
-          occupancyArray.push({ occupant: occupantAtCurrent, row: currentRow, col: currentCol });
-          currentRow += direction.row;
-          currentCol += direction.col;
-        }
-
-        let secondNonZeroIndex = -1;
-        for (let i = 1; i < occupancyArray.length; i++) {
-          if (occupancyArray[i].occupant !== 0) {
-            secondNonZeroIndex = i;
-            break;
-          }
-        }
-
-        if (secondNonZeroIndex !== -1) {
-          const mirroredIndex = secondNonZeroIndex * 2;
-          if (mirroredIndex < occupancyArray.length) {
-            const mirroredRow = occupancyArray[mirroredIndex].row;
-            const mirroredCol = occupancyArray[mirroredIndex].col;
-            if (mirroredRow >= 0 && mirroredRow < grid.length && mirroredCol >= 0 && mirroredCol < grid[0].length &&
-                !boundarySet.has(`${mirroredRow},${mirroredCol}`) && grid[mirroredRow][mirroredCol] === 0) {
-              let isValidJump = true;
-              for (let i = secondNonZeroIndex + 1; i < mirroredIndex; i++) {
-                if (occupancyArray[i].occupant !== 0) {
-                  isValidJump = false;
-                  break;
-                }
-              }
-              if (isValidJump && !visited.has(`${mirroredRow},${mirroredCol}`)) {
-                const newPath = [...path, { row: mirroredRow, col: mirroredCol }];
-                validJumps.push({ row: mirroredRow, col: mirroredCol, path: newPath });
-                visited.add(`${mirroredRow},${mirroredCol}`);
-                queue.push({ row: mirroredRow, col: mirroredCol, path: newPath });
-
-                // Log the jump and the path leading to it
-                //console.log(`Jump to (${mirroredRow}, ${mirroredCol}) with path: ${JSON.stringify(newPath)}`);
-              }
-            }
-          }
-        }
-      });
+  // Adjacent moves
+  for (const dir of DIRECTIONS) {
+    const nr = row + dir.row;
+    const nc = col + dir.col;
+    if (isInBounds(nr, nc, grid) && grid[nr][nc] === 0 && !isBlocked(nr, nc)) {
+      legalMoves.push({ row: nr, col: nc });
     }
+  }
 
-    return validJumps;
-  };
+  // BFS for multi-jump moves
+  const queue = [{ row, col }];
+  const visited = new Set([`${row},${col}`]);
 
-  // Add adjacent moves (normal moves)
-  directions.forEach((direction) => {
-    const adjacentRow = row + direction.row;
-    const adjacentCol = col + direction.col;
-    if (adjacentRow >= 0 && adjacentRow < grid.length && adjacentCol >= 0 && adjacentCol < grid[0].length &&
-        grid[adjacentRow][adjacentCol] === 0 && !boundarySet.has(`${adjacentRow},${adjacentCol}`)) {
-      legalMoves.push({ row: adjacentRow, col: adjacentCol });
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    for (const dir of DIRECTIONS) {
+      let cr = current.row + dir.row;
+      let cc = current.col + dir.col;
+      const line = [{ row: current.row, col: current.col, occupant: grid[current.row]?.[current.col] ?? occupant }];
+
+      // Walk along this direction, collecting cells
+      while (isInBounds(cr, cc, grid) && !isBlocked(cr, cc)) {
+        line.push({ row: cr, col: cc, occupant: grid[cr][cc] });
+        cr += dir.row;
+        cc += dir.col;
+      }
+
+      // Find first occupied cell in the line (skip index 0, that's the current piece)
+      let pivotIndex = -1;
+      for (let i = 1; i < line.length; i++) {
+        if (line[i].occupant !== 0) {
+          pivotIndex = i;
+          break;
+        }
+      }
+
+      if (pivotIndex === -1) continue;
+
+      // Mirror: landing spot is at 2x the pivot distance
+      const mirrorIndex = pivotIndex * 2;
+      if (mirrorIndex >= line.length) continue;
+
+      const landing = line[mirrorIndex];
+      if (landing.occupant !== 0) continue;
+
+      // Verify all cells between pivot and landing are empty
+      let clear = true;
+      for (let i = pivotIndex + 1; i < mirrorIndex; i++) {
+        if (line[i].occupant !== 0) {
+          clear = false;
+          break;
+        }
+      }
+
+      if (clear && !visited.has(`${landing.row},${landing.col}`)) {
+        visited.add(`${landing.row},${landing.col}`);
+        legalMoves.push({ row: landing.row, col: landing.col });
+        queue.push({ row: landing.row, col: landing.col });
+      }
     }
-  });
-
-  // Get multi-jump legal moves
-  const multiJumpMoves = bfsJump(row, col, occupant);
-  legalMoves.push(...multiJumpMoves);
+  }
 
   return legalMoves;
 }

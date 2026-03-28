@@ -1,22 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useCallback } from 'react';
 import { getCircleColor } from './boardUtils';
 
-const Grid = ({ 
-  grid, 
-  selectedCircle, 
-  legalMoves, 
-  handleCircleSelect, 
-  handleMove, 
-  gridWidth, 
-  gridHeight, 
-  circleDiameter, 
-  occupantGrid, 
-  aiMove 
+// Single shared hover sound instance
+const hoverSound = new Audio('/media/hover.mp3');
+
+const Grid = ({
+  grid,
+  selectedCircle,
+  legalMoves,
+  handleCircleSelect,
+  handleMove,
+  gridWidth,
+  gridHeight,
+  circleDiameter,
+  occupantGrid,
 }) => {
-  const handleHover = (rowIndex, colIndex) => {
-    const hoverSound = new Audio('/media/hover.mp3');  
-    hoverSound.play().catch((err) => console.error("Hover sound error:", err));
-  };
+  const handleHover = useCallback(() => {
+    hoverSound.currentTime = 0;
+    hoverSound.play().catch(() => {});
+  }, []);
 
   const isLegalMove = (row, col) =>
     legalMoves.some((move) => move.row === row && move.col === col);
@@ -29,12 +31,6 @@ const Grid = ({
     }
   };
 
-  React.useEffect(() => {
-    if (aiMove) {
-      handleMove(aiMove.row, aiMove.col); 
-    }
-  }, [aiMove, handleMove]);
-
   return (
     <div className="board-grid">
       {grid.map((row, rowIndex) => (
@@ -44,8 +40,8 @@ const Grid = ({
               className="cell"
               key={colIndex}
               style={{ width: gridWidth, height: gridHeight }}
-              onClick={() => handleClick(rowIndex, colIndex)} 
-              onMouseEnter={() => handleHover(rowIndex, colIndex)} 
+              onClick={() => handleClick(rowIndex, colIndex)}
+              onMouseEnter={handleHover}
             >
               <div
                 className={`circle ${isLegalMove(rowIndex, colIndex) ? 'legal-move' : ''} ${

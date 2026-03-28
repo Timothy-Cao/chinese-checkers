@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Typography } from '@mui/material'; 
+import { Dialog, DialogContent, DialogTitle, Button, Typography } from '@mui/material';
 import { red, blue } from '@mui/material/colors'; 
 
 const CongratulationsPopup = ({ open, winner, onClose, onReset }) => {

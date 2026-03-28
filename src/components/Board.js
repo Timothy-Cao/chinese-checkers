@@ -1,132 +1,133 @@
-import React, { useState, useEffect } from 'react';
-import { Switch, FormControlLabel } from '@mui/material';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Switch, FormControlLabel, Slider, Select, MenuItem, Typography } from '@mui/material';
 import './board.css';
 import { generateOccupantGrid, generateBoard, generateBoardFromString, getBoardString, handleMoveOnGrid, checkWinner } from './boardUtils';
 import { getLegalMoves } from './legalMoves';
-import BoardStringInput from './BoardStringInput'; 
+import BoardStringInput from './BoardStringInput';
 import Grid from './Grid';
 import CongratulationsPopup from './CongratulationsPopup';
-import { BlueAI } from './BlueAI'; 
-import { RedAI } from './RedAI'; 
+import { getAIMove, AI_LEVELS, AI_LEVEL_NAMES } from './AI';
+import {
+  ROWS, COLS, ROW_PATTERN, START_COLUMNS,
+  GRID_WIDTH, GRID_HEIGHT, CIRCLE_DIAMETER,
+  PLAYER_RED, PLAYER_BLUE,
+} from './constants';
+
+// Create audio objects once, outside component
+const goodSound = new Audio('/media/good.mp3');
+const badSound = new Audio('/media/bad.mp3');
 
 const Board = () => {
-  const gridWidth = 50;
-  const gridHeight = 0.9 * gridWidth;
-  const circleDiameter = 0.8 * gridWidth;
-  const rows = 17;
-  const cols = 24;
-
-  const rowPattern = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1];
-  const startColumns = [4, 4, 4, 4, 0, 1, 2, 3, 4, 4, 4, 4, 4, 9, 10, 11, 12];
-
   const [selectedCircle, setSelectedCircle] = useState(null);
-  const [occupantGrid, setOccupantGrid] = useState(generateOccupantGrid(rows, cols));
+  const [occupantGrid, setOccupantGrid] = useState(() => generateOccupantGrid(ROWS, COLS));
   const [legalMoves, setLegalMoves] = useState([]);
-  const [turn, setTurn] = useState(1); 
-  const [boardString, setBoardString] = useState(''); 
-  const [openDialog, setOpenDialog] = useState(false); 
-  const [winner, setWinner] = useState(null); 
-  const [blueAIEnabled, setBlueAIEnabled] = useState(true); 
-  const [redAIEnabled, setRedAIEnabled] = useState(false); 
+  const [turn, setTurn] = useState(PLAYER_RED);
+  const [boardString, setBoardString] = useState('');
+  const [winner, setWinner] = useState(null);
+  const [blueAIEnabled, setBlueAIEnabled] = useState(true);
+  const [redAIEnabled, setRedAIEnabled] = useState(false);
+  const [blueAILevel, setBlueAILevel] = useState('greedy');
+  const [redAILevel, setRedAILevel] = useState('greedy');
+  const [aiSpeed, setAiSpeed] = useState(200);
 
-  const grid = generateBoard(rowPattern, startColumns);
+  const turnRef = useRef(turn);
+  turnRef.current = turn;
 
-  const goodSound = new Audio('/media/good.mp3');
-  const badSound = new Audio('/media/bad.mp3');
+  const grid = generateBoard(ROW_PATTERN, START_COLUMNS);
 
-  const handleCircleSelect = (rowIndex, colIndex) => {
+  const handleCircleSelect = useCallback((rowIndex, colIndex) => {
     const occupant = occupantGrid[rowIndex][colIndex];
-  
+
     if (selectedCircle && selectedCircle.row === rowIndex && selectedCircle.col === colIndex) {
       setSelectedCircle(null);
       setLegalMoves([]);
       return;
     }
-  
-    if (occupant === 0 || occupant !== turn) { 
-      badSound.play();
+
+    if (occupant === 0 || occupant !== turnRef.current) {
+      badSound.play().catch(() => {});
       setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
-      setLegalMoves([]); 
+      setLegalMoves([]);
       return;
     }
 
-    goodSound.play();
+    goodSound.play().catch(() => {});
     setSelectedCircle({ row: rowIndex, col: colIndex, occupant });
     const moves = getLegalMoves(rowIndex, colIndex, occupant, occupantGrid);
     setLegalMoves(moves);
-  };
-  
-  const resetBoard = () => {
-    const initialGrid = generateOccupantGrid(rows, cols); 
-    setOccupantGrid(initialGrid);
-    setSelectedCircle(null);
-    setLegalMoves([]);
-    setTurn(1); 
-    setWinner(null); 
-  };
+  }, [occupantGrid, selectedCircle]);
 
-  const handleMove = (rowIndex, colIndex) => {
+  const handleMove = useCallback((rowIndex, colIndex) => {
     if (!legalMoves.some((move) => move.row === rowIndex && move.col === colIndex)) return;
 
     const newGrid = handleMoveOnGrid(occupantGrid, selectedCircle, rowIndex, colIndex);
 
-    goodSound.play();
+    goodSound.play().catch(() => {});
     setOccupantGrid(newGrid);
     setSelectedCircle(null);
     setLegalMoves([]);
-    setTurn(turn === 1 ? 2 : 1); 
+    setTurn((prev) => (prev === PLAYER_RED ? PLAYER_BLUE : PLAYER_RED));
 
-    if (checkWinner(newGrid, turn)) {
-      setWinner(turn); 
-      setOpenDialog(true); 
+    if (checkWinner(newGrid, turnRef.current)) {
+      setWinner(turnRef.current);
       setBlueAIEnabled(false);
       setRedAIEnabled(false);
     }
-  };
+  }, [legalMoves, occupantGrid, selectedCircle]);
 
-  const performAIMove = (aiType) => {
-    const aiMove = aiType(occupantGrid);
-    if (aiMove) {
-      const newGrid = handleMoveOnGrid(occupantGrid, aiMove.selectedCircle, aiMove.moveTo.row, aiMove.moveTo.col);
-      goodSound.play();
-      setOccupantGrid(newGrid); 
-      setSelectedCircle(aiMove.selectedCircle); 
-      setLegalMoves([]); 
-      setTurn(turn === 1 ? 2 : 1); 
-      if (checkWinner(newGrid, turn)) {
-        setWinner(turn); 
-        setOpenDialog(true); 
-        setBlueAIEnabled(false);
-        setRedAIEnabled(false);
+  // AI execution
+  useEffect(() => {
+    if (winner) return;
+
+    const isAITurn =
+      (blueAIEnabled && turn === PLAYER_BLUE) ||
+      (redAIEnabled && turn === PLAYER_RED);
+
+    if (!isAITurn) return;
+
+    const timer = setTimeout(() => {
+      const level = turn === PLAYER_BLUE ? blueAILevel : redAILevel;
+      const aiMove = getAIMove(occupantGrid, turn, level);
+
+      if (aiMove) {
+        const newGrid = handleMoveOnGrid(occupantGrid, aiMove.selectedCircle, aiMove.moveTo.row, aiMove.moveTo.col);
+        goodSound.play().catch(() => {});
+        setOccupantGrid(newGrid);
+        setSelectedCircle(aiMove.selectedCircle);
+        setLegalMoves([]);
+
+        if (checkWinner(newGrid, turn)) {
+          setWinner(turn);
+          setBlueAIEnabled(false);
+          setRedAIEnabled(false);
+        } else {
+          setTurn((prev) => (prev === PLAYER_RED ? PLAYER_BLUE : PLAYER_RED));
+        }
+      } else {
+        // No legal moves — skip turn
+        setTurn((prev) => (prev === PLAYER_RED ? PLAYER_BLUE : PLAYER_RED));
       }
-    }
-  };
+    }, aiSpeed);
 
-  useEffect(() => {
-    if (blueAIEnabled && turn === 2) {
-      setTimeout(() => {
-        performAIMove(BlueAI);
-      }, 200);
-    }
-  }, [blueAIEnabled, turn, occupantGrid]);
+    return () => clearTimeout(timer);
+  }, [blueAIEnabled, redAIEnabled, blueAILevel, redAILevel, turn, occupantGrid, winner, aiSpeed]);
 
-  useEffect(() => {
-    if (redAIEnabled && turn === 1) {
-      setTimeout(() => {
-        performAIMove(RedAI); 
-      }, 200);
-    }
-  }, [redAIEnabled, turn, occupantGrid]);
+  const resetBoard = useCallback(() => {
+    setOccupantGrid(generateOccupantGrid(ROWS, COLS));
+    setSelectedCircle(null);
+    setLegalMoves([]);
+    setTurn(PLAYER_RED);
+    setWinner(null);
+  }, []);
 
-  const backgroundColor = turn === 1 ? '#600000' : '#000d2b';
+  const backgroundColor = turn === PLAYER_RED ? '#600000' : '#000d2b';
 
   const handleBoardStringChange = (event) => {
     setBoardString(event.target.value);
   };
 
   const getBoardStringValue = () => {
-    const gridString = getBoardString(occupantGrid);
-    setBoardString(gridString); 
+    setBoardString(getBoardString(occupantGrid));
   };
 
   const loadBoardFromString = () => {
@@ -136,6 +137,15 @@ const Board = () => {
       return;
     }
     setOccupantGrid(loadedGrid);
+  };
+
+  const selectSx = {
+    color: 'white',
+    '.MuiSelect-icon': { color: 'white' },
+    '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
+    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.6)' },
+    fontSize: '0.8rem',
+    height: 32,
   };
 
   return (
@@ -149,17 +159,11 @@ const Board = () => {
             legalMoves={legalMoves}
             handleCircleSelect={handleCircleSelect}
             handleMove={handleMove}
-            gridWidth={gridWidth}
-            gridHeight={gridHeight}
-            circleDiameter={circleDiameter}
+            gridWidth={GRID_WIDTH}
+            gridHeight={GRID_HEIGHT}
+            circleDiameter={CIRCLE_DIAMETER}
             occupantGrid={occupantGrid}
-            aiMove={
-              (blueAIEnabled && turn === 2) ? BlueAI(occupantGrid) :
-              (redAIEnabled && turn === 1) ? RedAI(occupantGrid) :
-              null
-            }
           />
-          
         </div>
         <BoardStringInput
           boardString={boardString}
@@ -170,45 +174,103 @@ const Board = () => {
         />
       </div>
 
-      <FormControlLabel
-        control={
-          <Switch
-            checked={blueAIEnabled}
-            onChange={() => setBlueAIEnabled((prev) => !prev)}
-            name="BlueAI"
-            sx={{'& .MuiSwitch-track': {backgroundColor: 'white',},}}
-            color="primary"
+      {/* AI Control Panel */}
+      <div className="ai-controls">
+        {/* Blue AI */}
+        <div className="ai-player-row">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={blueAIEnabled}
+                onChange={() => setBlueAIEnabled((prev) => !prev)}
+                size="small"
+                sx={{ '& .MuiSwitch-track': { backgroundColor: 'white' } }}
+                color="primary"
+              />
+            }
+            label={<Typography sx={{ color: 'white', fontSize: '0.85rem' }}>Blue AI</Typography>}
+            sx={{ mr: 0 }}
           />
-        }
-        label="Blue-AI"
-        className="form-control-label blue"
-      />
+          {blueAIEnabled && (
+            <Select
+              value={blueAILevel}
+              onChange={(e) => setBlueAILevel(e.target.value)}
+              size="small"
+              sx={selectSx}
+            >
+              {AI_LEVELS.map((lvl) => (
+                <MenuItem key={lvl} value={lvl}>{AI_LEVEL_NAMES[lvl]}</MenuItem>
+              ))}
+            </Select>
+          )}
+        </div>
 
-      <FormControlLabel
-        control={
-          <Switch
-            checked={redAIEnabled}
-            onChange={() => setRedAIEnabled((prev) => !prev)}
-            name="RedAI"      
-            sx={{'& .MuiSwitch-track': {backgroundColor: 'white',},}}
-            color="primary"
+        {/* Red AI */}
+        <div className="ai-player-row">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={redAIEnabled}
+                onChange={() => setRedAIEnabled((prev) => !prev)}
+                size="small"
+                sx={{ '& .MuiSwitch-track': { backgroundColor: 'white' } }}
+                color="primary"
+              />
+            }
+            label={<Typography sx={{ color: 'white', fontSize: '0.85rem' }}>Red AI</Typography>}
+            sx={{ mr: 0 }}
           />
-        }
-        label="Red-AI"
-        className="form-control-label red"
-      />
+          {redAIEnabled && (
+            <Select
+              value={redAILevel}
+              onChange={(e) => setRedAILevel(e.target.value)}
+              size="small"
+              sx={selectSx}
+            >
+              {AI_LEVELS.map((lvl) => (
+                <MenuItem key={lvl} value={lvl}>{AI_LEVEL_NAMES[lvl]}</MenuItem>
+              ))}
+            </Select>
+          )}
+        </div>
 
-      <CongratulationsPopup 
-        open={winner !== null} 
-        winner={winner} 
-        onClose={() => setWinner(null)} 
-        onReset={resetBoard} 
+        {/* Speed slider — only when at least one AI enabled */}
+        {(blueAIEnabled || redAIEnabled) && (
+          <div className="ai-speed-control">
+            <Typography sx={{ color: 'white', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+              Speed
+            </Typography>
+            <Slider
+              value={aiSpeed}
+              onChange={(_, val) => setAiSpeed(val)}
+              min={100}
+              max={1000}
+              step={50}
+              size="small"
+              sx={{
+                width: 100,
+                color: 'white',
+                '& .MuiSlider-thumb': { width: 12, height: 12 },
+              }}
+            />
+            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+              {aiSpeed}ms
+            </Typography>
+          </div>
+        )}
+      </div>
+
+      <CongratulationsPopup
+        open={winner !== null}
+        winner={winner}
+        onClose={() => setWinner(null)}
+        onReset={resetBoard}
       />
       {selectedCircle && (
-            <div className="selection-info">
-              Row: {selectedCircle.row} Col: {selectedCircle.col}
-            </div>
-          )}
+        <div className="selection-info">
+          Row: {selectedCircle.row} Col: {selectedCircle.col}
+        </div>
+      )}
     </div>
   );
 };

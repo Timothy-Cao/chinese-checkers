@@ -1,31 +1,15 @@
+// AIUtils.js — Distance metrics for AI evaluation
 
-// Calculate the hex distance between two points (x1, y1) and (x2, y2)
-export function hexDistance(x1, y1, x2, y2) {
-  const dx = Math.abs(x2 - x1);
-  const dy = Math.abs(y2 - y1);
-  const diagonalMoves = Math.min(dx, dy);
-  const remainingMoves = Math.abs(dx - dy);
-  return diagonalMoves + remainingMoves;
+// Chebyshev distance on the hex-like grid (accounts for diagonal movement)
+export function hexDistance(r1, c1, r2, c2) {
+  const dr = Math.abs(r2 - r1);
+  const dc = Math.abs(c2 - c1);
+  const diag = Math.min(dr, dc);
+  const straight = Math.abs(dr - dc);
+  return diag + straight;
 }
 
-// Scoring function that calculates the "distance" between a given point and an expected line
-export function scoringFunction(x, y) {
-  const expectedY = 0.5 * x + 4;  // Example linear equation y = 0.5 * x + 4
-  const distance = Math.abs(y - expectedY);
-  return distance;
-}
-
-// Calculate the position score based on the difference between the current and target positions
-export function positionScore(x1, y1, x2, y2) {
-  const horizontalDistance = Math.abs(x2 - x1);
-  const verticalDistance = Math.abs(y2 - y1);
-  return horizontalDistance + verticalDistance;
-}
-
-// Calculate the cartesian distance between two points (x1, y1) and (x2, y2)
-export function cartDistance(x1, y1, x2, y2) {
-  const horizontalDistance = Math.abs(x2 - x1);
-  const verticalDistance = scoringFunction(x1, y1) - scoringFunction(x2, y2);
-  const totalDistance = Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
-  return totalDistance;
+// Manhattan distance (simple row + col difference)
+export function manhattanDistance(r1, c1, r2, c2) {
+  return Math.abs(r2 - r1) + Math.abs(c2 - c1);
 }

@@ -1,117 +1,129 @@
-.title-container {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 1;
-  text-align: left;
-  padding: 10px;
-  background-color: transparent;
+/* --- Title & Rules --- */
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.title-box {
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 10px;
-  display: inline-block;
-  min-width: 300px;
-  padding: 20px;
-}
 .main-title {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .subtitle {
-  font-size: 1rem;
-  color: gray;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
 }
 
-.text {
-  font-size: 0.875rem;
-  color: #666;
+.author {
+  font-size: 0.68rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.2);
+  margin: 2px 0 0 0;
 }
 
-/* Question mark button for small screens */
+/* Rules toggle button */
 .rules-toggle-button {
-  display: none;
-  background-color: #fff;
-  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
-  font-size: 1.5rem;
-  width: 30px;
-  height: 30px;
+  font-size: 0.8rem;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  padding: 0;
+  line-height: 1;
 }
 
 .rules-toggle-button:hover {
-  background-color: #f0f0f0;
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
 }
 
-/* Rules box (visible only for large screens) */
-.rules-box {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  border-radius: 5px;
-  margin-top: 20px;
-  width: 300px;
-}
-
-/* Full-screen rules modal for small screens */
+/* Rules modal */
 .rules-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  z-index: 20;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 100;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
+  backdrop-filter: blur(4px);
 }
 
 .rules-modal-content {
-  background-color: rgba(255, 255, 255, 0.9);
-  color: #000;
-  border-radius: 10px;
-  padding: 20px;
+  background: rgba(20, 20, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
   width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 440px;
   position: relative;
-  text-align: left;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.rules-modal-content h2 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.rules-modal-content p {
+  margin: 0 0 8px 0;
+}
+
+.rules-modal-content ul {
+  margin: 4px 0 0 0;
+  padding-left: 20px;
+}
+
+.rules-modal-content li {
+  margin-bottom: 4px;
 }
 
 .close-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #fff;
-  border: none;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
+  font-size: 0.9rem;
+  width: 28px;
+  height: 28px;
   cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  padding: 0;
+  line-height: 1;
 }
 
-@media (max-width: 1200px), (max-height: 900px) {
-  .rules-box {
-    display: none;
-  }
-
-  .rules-toggle-button {
-    display: inline-block;
-  }
-
-  .title-box {
-    min-width: calc(100% - 40px);
-  }
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
 }

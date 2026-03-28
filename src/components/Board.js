@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Switch, FormControlLabel, Slider, Select, MenuItem, Typography } from '@mui/material';
 import './board.css';
+import './Title.css';
 import { generateOccupantGrid, generateBoard, generateBoardFromString, getBoardString, handleMoveOnGrid, checkWinner } from './boardUtils';
 import { getLegalMoves } from './legalMoves';
 import BoardStringInput from './BoardStringInput';
@@ -13,7 +14,6 @@ import {
   PLAYER_RED, PLAYER_BLUE,
 } from './constants';
 
-// Create audio objects once, outside component
 const goodSound = new Audio('/media/good.mp3');
 const badSound = new Audio('/media/bad.mp3');
 
@@ -29,6 +29,8 @@ const Board = () => {
   const [blueAILevel, setBlueAILevel] = useState('greedy');
   const [redAILevel, setRedAILevel] = useState('greedy');
   const [aiSpeed, setAiSpeed] = useState(200);
+  const [showDebug, setShowDebug] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
   const turnRef = useRef(turn);
   turnRef.current = turn;
@@ -75,7 +77,6 @@ const Board = () => {
     }
   }, [legalMoves, occupantGrid, selectedCircle]);
 
-  // AI execution
   useEffect(() => {
     if (winner) return;
 
@@ -104,7 +105,6 @@ const Board = () => {
           setTurn((prev) => (prev === PLAYER_RED ? PLAYER_BLUE : PLAYER_RED));
         }
       } else {
-        // No legal moves — skip turn
         setTurn((prev) => (prev === PLAYER_RED ? PLAYER_BLUE : PLAYER_RED));
       }
     }, aiSpeed);
@@ -120,38 +120,132 @@ const Board = () => {
     setWinner(null);
   }, []);
 
-  const backgroundColor = turn === PLAYER_RED ? '#600000' : '#000d2b';
-
-  const handleBoardStringChange = (event) => {
-    setBoardString(event.target.value);
-  };
-
-  const getBoardStringValue = () => {
-    setBoardString(getBoardString(occupantGrid));
-  };
-
-  const loadBoardFromString = () => {
-    const loadedGrid = generateBoardFromString(boardString);
-    if (loadedGrid === null) {
-      alert('Invalid board string');
-      return;
-    }
-    setOccupantGrid(loadedGrid);
-  };
+  const turnColor = turn === PLAYER_RED ? 'red' : 'blue';
+  const turnLabel = turn === PLAYER_RED ? "Red's Turn" : "Blue's Turn";
 
   const selectSx = {
-    color: 'white',
-    '.MuiSelect-icon': { color: 'white' },
-    '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.6)' },
-    fontSize: '0.8rem',
-    height: 32,
+    color: 'rgba(255,255,255,0.8)',
+    '.MuiSelect-icon': { color: 'rgba(255,255,255,0.4)' },
+    '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.1)' },
+    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
+    fontSize: '0.75rem',
+    height: 30,
+  };
+
+  const switchSx = {
+    '& .MuiSwitch-track': { backgroundColor: 'rgba(255,255,255,0.2)' },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: turnColor === 'red' ? 'rgba(239,68,68,0.4)' : 'rgba(59,130,246,0.4)',
+    },
   };
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
-      <div className="background-layer" style={{ backgroundColor }}></div>
-      <div className="board-layer">
+    <div className="page">
+      {/* Top Bar: Title left, AI Controls right */}
+      <div className="top-bar">
+        <div className="title-section">
+          <h1 className="main-title">
+            Chinese Checkers
+            <button className="rules-toggle-button" onClick={() => setShowRules(true)}>?</button>
+          </h1>
+          <p className="subtitle">Long Jump Variation</p>
+        </div>
+
+        <div className="ai-controls glass-card">
+          <div className="ai-player-row">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={blueAIEnabled}
+                  onChange={() => setBlueAIEnabled((prev) => !prev)}
+                  size="small"
+                  sx={switchSx}
+                />
+              }
+              label={<Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', fontFamily: 'inherit' }}>Blue AI</Typography>}
+              sx={{ mr: 0 }}
+            />
+            {blueAIEnabled && (
+              <Select value={blueAILevel} onChange={(e) => setBlueAILevel(e.target.value)} size="small" sx={selectSx}>
+                {AI_LEVELS.map((lvl) => (
+                  <MenuItem key={lvl} value={lvl}>{AI_LEVEL_NAMES[lvl]}</MenuItem>
+                ))}
+              </Select>
+            )}
+          </div>
+
+          <div className="ai-player-row">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={redAIEnabled}
+                  onChange={() => setRedAIEnabled((prev) => !prev)}
+                  size="small"
+                  sx={switchSx}
+                />
+              }
+              label={<Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', fontFamily: 'inherit' }}>Red AI</Typography>}
+              sx={{ mr: 0 }}
+            />
+            {redAIEnabled && (
+              <Select value={redAILevel} onChange={(e) => setRedAILevel(e.target.value)} size="small" sx={selectSx}>
+                {AI_LEVELS.map((lvl) => (
+                  <MenuItem key={lvl} value={lvl}>{AI_LEVEL_NAMES[lvl]}</MenuItem>
+                ))}
+              </Select>
+            )}
+          </div>
+
+          {(blueAIEnabled || redAIEnabled) && (
+            <div className="ai-speed-control">
+              <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
+                Speed
+              </Typography>
+              <Slider
+                value={aiSpeed}
+                onChange={(_, val) => setAiSpeed(val)}
+                min={100}
+                max={1000}
+                step={50}
+                size="small"
+                sx={{
+                  width: 80,
+                  color: 'rgba(255,255,255,0.3)',
+                  '& .MuiSlider-thumb': { width: 10, height: 10, backgroundColor: 'rgba(255,255,255,0.6)' },
+                  '& .MuiSlider-track': { backgroundColor: 'rgba(255,255,255,0.3)' },
+                  '& .MuiSlider-rail': { backgroundColor: 'rgba(255,255,255,0.1)' },
+                }}
+              />
+              <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
+                {aiSpeed}ms
+              </Typography>
+            </div>
+          )}
+
+          <button
+            onClick={resetBoard}
+            style={{
+              marginTop: 4,
+              padding: '5px 0',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.15)',
+              borderRadius: 6,
+              color: 'rgba(239, 68, 68, 0.7)',
+              cursor: 'pointer',
+              fontSize: '0.72rem',
+              fontFamily: 'inherit',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Board */}
+      <div className="board-area">
         <div className="board">
           <Grid
             grid={grid}
@@ -163,102 +257,62 @@ const Board = () => {
             gridHeight={GRID_HEIGHT}
             circleDiameter={CIRCLE_DIAMETER}
             occupantGrid={occupantGrid}
+            turnColor={turnColor}
           />
         </div>
-        <BoardStringInput
-          boardString={boardString}
-          handleBoardStringChange={handleBoardStringChange}
-          getBoardStringValue={getBoardStringValue}
-          loadBoardFromString={loadBoardFromString}
-          resetBoard={resetBoard}
-        />
+
+        {/* Turn Indicator */}
+        <div className="turn-indicator glass-card">
+          <div className={`turn-dot ${turnColor}`} />
+          {turnLabel}
+        </div>
       </div>
 
-      {/* AI Control Panel */}
-      <div className="ai-controls">
-        {/* Blue AI */}
-        <div className="ai-player-row">
-          <FormControlLabel
-            control={
-              <Switch
-                checked={blueAIEnabled}
-                onChange={() => setBlueAIEnabled((prev) => !prev)}
-                size="small"
-                sx={{ '& .MuiSwitch-track': { backgroundColor: 'white' } }}
-                color="primary"
-              />
-            }
-            label={<Typography sx={{ color: 'white', fontSize: '0.85rem' }}>Blue AI</Typography>}
-            sx={{ mr: 0 }}
-          />
-          {blueAIEnabled && (
-            <Select
-              value={blueAILevel}
-              onChange={(e) => setBlueAILevel(e.target.value)}
-              size="small"
-              sx={selectSx}
-            >
-              {AI_LEVELS.map((lvl) => (
-                <MenuItem key={lvl} value={lvl}>{AI_LEVEL_NAMES[lvl]}</MenuItem>
-              ))}
-            </Select>
-          )}
+      {/* Selection Info */}
+      {selectedCircle && (
+        <div className="selection-info">
+          Row {selectedCircle.row}, Col {selectedCircle.col}
         </div>
+      )}
 
-        {/* Red AI */}
-        <div className="ai-player-row">
-          <FormControlLabel
-            control={
-              <Switch
-                checked={redAIEnabled}
-                onChange={() => setRedAIEnabled((prev) => !prev)}
-                size="small"
-                sx={{ '& .MuiSwitch-track': { backgroundColor: 'white' } }}
-                color="primary"
-              />
-            }
-            label={<Typography sx={{ color: 'white', fontSize: '0.85rem' }}>Red AI</Typography>}
-            sx={{ mr: 0 }}
+      {/* Debug Toggle */}
+      <button className="debug-toggle" onClick={() => setShowDebug((prev) => !prev)}>
+        {showDebug ? 'Hide Debug' : 'Debug'}
+      </button>
+
+      {/* Debug Panel */}
+      {showDebug && (
+        <div className="input-box glass-card">
+          <BoardStringInput
+            boardString={boardString}
+            handleBoardStringChange={(e) => setBoardString(e.target.value)}
+            getBoardStringValue={() => setBoardString(getBoardString(occupantGrid))}
+            loadBoardFromString={() => {
+              const loadedGrid = generateBoardFromString(boardString);
+              if (loadedGrid === null) { alert('Invalid board string'); return; }
+              setOccupantGrid(loadedGrid);
+            }}
+            resetBoard={resetBoard}
           />
-          {redAIEnabled && (
-            <Select
-              value={redAILevel}
-              onChange={(e) => setRedAILevel(e.target.value)}
-              size="small"
-              sx={selectSx}
-            >
-              {AI_LEVELS.map((lvl) => (
-                <MenuItem key={lvl} value={lvl}>{AI_LEVEL_NAMES[lvl]}</MenuItem>
-              ))}
-            </Select>
-          )}
         </div>
+      )}
 
-        {/* Speed slider — only when at least one AI enabled */}
-        {(blueAIEnabled || redAIEnabled) && (
-          <div className="ai-speed-control">
-            <Typography sx={{ color: 'white', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
-              Speed
-            </Typography>
-            <Slider
-              value={aiSpeed}
-              onChange={(_, val) => setAiSpeed(val)}
-              min={100}
-              max={1000}
-              step={50}
-              size="small"
-              sx={{
-                width: 100,
-                color: 'white',
-                '& .MuiSlider-thumb': { width: 12, height: 12 },
-              }}
-            />
-            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-              {aiSpeed}ms
-            </Typography>
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="rules-modal" onClick={() => setShowRules(false)}>
+          <div className="rules-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-button" onClick={() => setShowRules(false)}>✕</button>
+            <h2>How to Play</h2>
+            <p><strong>Goal:</strong> Move all of your pieces across the board to the opposite triangle — the one your opponent started in.</p>
+            <p><strong>On each turn</strong>, move one piece:</p>
+            <ul>
+              <li>Step to an adjacent empty spot.</li>
+              <li>Jump over a pawn in a straight line if there is a piece at the midpoint and the landing spot is empty.</li>
+              <li>Chain any number of jumps in a single turn.</li>
+            </ul>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <CongratulationsPopup
         open={winner !== null}
@@ -266,11 +320,6 @@ const Board = () => {
         onClose={() => setWinner(null)}
         onReset={resetBoard}
       />
-      {selectedCircle && (
-        <div className="selection-info">
-          Row: {selectedCircle.row} Col: {selectedCircle.col}
-        </div>
-      )}
     </div>
   );
 };

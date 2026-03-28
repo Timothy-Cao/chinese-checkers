@@ -31,9 +31,9 @@ export const generateBoard = (rowPattern, startColumns) => {
 
 export const getCircleColor = (occupant) => {
   switch (occupant) {
-    case 1: return 'red';
-    case 2: return 'blue';
-    default: return '#222222';
+    case 1: return null; // Red — handled via CSS gradient
+    case 2: return null; // Blue — handled via CSS gradient
+    default: return null; // Empty — handled via CSS
   }
 };
 

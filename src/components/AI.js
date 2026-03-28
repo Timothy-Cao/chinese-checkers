@@ -249,6 +249,8 @@ function randomStrategy(occupantGrid, player) {
 }
 
 // --- Greedy ---
+// When no forward row progress is available, falls back to positional evaluation
+// to avoid oscillation between equally-scored lateral moves.
 function greedyStrategy(occupantGrid, player) {
   const allMoves = getAllMoves(occupantGrid, player);
   if (allMoves.length === 0) return null;
@@ -281,6 +283,12 @@ function greedyStrategy(occupantGrid, player) {
         }
       }
     }
+  }
+
+  // Anti-oscillation: if no forward progress found, fall back to positional eval
+  // so the AI makes meaningful arrangement moves instead of bouncing laterally.
+  if (bestRowDiff <= 0) {
+    return positionalStrategy(occupantGrid, player);
   }
 
   if (!bestMove) {

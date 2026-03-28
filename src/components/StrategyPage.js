@@ -380,7 +380,7 @@ const StrategyPage = () => {
         <hr className="section-divider" />
 
         <div className="strategy-section" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem' }}>
-          <p>Built by Tim Cao. AI strategies and analysis by Claude.</p>
+          <p>By Tim Cao</p>
           <Link to="/" className="back-link" style={{ justifyContent: 'center' }}>← Play the Game</Link>
         </div>
       </div>

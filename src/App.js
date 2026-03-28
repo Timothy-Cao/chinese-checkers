@@ -1,16 +1,18 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
 import Board from './components/Board';
 import StrategyPage from './components/StrategyPage';
 
 const App = () => {
+  const [view, setView] = useState('game');
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Board />} />
-        <Route path="/strategy" element={<StrategyPage />} />
-      </Routes>
-    </BrowserRouter>
+    <div style={{ minHeight: '100vh', background: '#0a0a0f' }}>
+      {view === 'game' ? (
+        <Board onShowStrategy={() => setView('strategy')} />
+      ) : (
+        <StrategyPage onBackToGame={() => setView('game')} />
+      )}
+    </div>
   );
 };
 

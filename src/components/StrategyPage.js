@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './strategy.css';
 
 const benchmarks = [
@@ -29,11 +28,11 @@ const BarChart = ({ data }) => (
   </div>
 );
 
-const StrategyPage = () => {
+const StrategyPage = ({ onBackToGame }) => {
   return (
     <div className="strategy-page">
       <div className="strategy-content">
-        <Link to="/" className="back-link">← Back to Game</Link>
+        <button onClick={onBackToGame} className="back-link">← Back to Game</button>
 
         {/* Hero */}
         <div className="strategy-hero">
@@ -381,7 +380,7 @@ const StrategyPage = () => {
 
         <div className="strategy-section" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem' }}>
           <p>By Tim Cao</p>
-          <Link to="/" className="back-link" style={{ justifyContent: 'center' }}>← Play the Game</Link>
+          <button onClick={onBackToGame} className="back-link" style={{ justifyContent: 'center' }}>← Play the Game</button>
         </div>
       </div>
     </div>

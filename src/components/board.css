@@ -319,6 +319,28 @@
   color: #ef4444;
 }
 
+/* --- Strategy Toggle Button --- */
+
+.strategy-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.68rem;
+  font-family: inherit;
+  padding: 4px 10px;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.strategy-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 /* --- Responsive: Tablet & Small Desktop --- */
 
 @media (max-width: 1200px), (max-height: 900px) {

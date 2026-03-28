@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { Switch, FormControlLabel, Slider, Select, MenuItem, Typography } from '@mui/material';
 import './board.css';
 import './Title.css';
@@ -18,7 +17,7 @@ import {
 const goodSound = new Audio('/media/good.mp3');
 const badSound = new Audio('/media/bad.mp3');
 
-const Board = () => {
+const Board = ({ onShowStrategy }) => {
   const [selectedCircle, setSelectedCircle] = useState(null);
   const [occupantGrid, setOccupantGrid] = useState(() => generateOccupantGrid(ROWS, COLS));
   const [legalMoves, setLegalMoves] = useState([]);
@@ -150,7 +149,14 @@ const Board = () => {
             <button className="rules-toggle-button" onClick={() => setShowRules(true)}>?</button>
           </h1>
           <p className="subtitle">Long Jump Variation</p>
-          <Link to="/strategy" style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none', marginTop: 2, transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = 'rgba(255,255,255,0.7)'} onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.3)'}>Strategy Analysis →</Link>
+          {onShowStrategy && (
+            <button
+              className="strategy-toggle"
+              onClick={onShowStrategy}
+            >
+              Strategy Analysis
+            </button>
+          )}
         </div>
 
         <div className="ai-controls glass-card">
